@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed Feb 26 09:48:31 KST 2020-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.erp.account.slip.dao.NewJournalDetailDAO">
+
+    <resultMap id="newJournalDetailResult" type="kr.co.seoulit.erp.account.slip.to.NewJournalDetailBean">
+        <result column="journal_detail_no" property="journalDetailNo"/>
+        <result column="journal_no" property="journalNo"/>
+        <result column="account_control_type" property="accountControlType"/>
+        <result column="account_control_name" property="accountControlName"/>
+        <result column="account_control_code" property="accountControlCode"/>
+        <result column="journal_description" property="journalDescription"/>
+        <result column="account_name" property="accountName"/>
+    </resultMap>
+
+    <!-- 2024/05/24 아래 CRUD문은 Ai가 만든거라 따로 검증들 해보십쇼 ^,.^ -->
+    <!-- SELECT -->
+    <select id="selectNewJournalDetail" resultMap="newJournalDetailResult">
+        SELECT * FROM NEW_JOURNAL_DETAIL WHERE journal_detail_no = #{journalDetailNo}
+    </select>
+
+    <!-- UPDATE -->
+    <update id="updateNewJournalDetail" parameterType="kr.co.seoulit.erp.account.slip.to.NewJournalDetailBean">
+        UPDATE NEW_JOURNAL_DETAIL
+        SET
+            journal_no = #{journalNo},
+            account_control_type = #{accountControlType},
+            account_control_name = #{accountControlName},
+            account_control_code = #{accountControlCode},
+            journal_description = #{journalDescription},
+            account_name = #{accountName}
+        WHERE journal_detail_no = #{journalDetailNo}
+    </update>
+
+    <!-- DELETE -->
+    <delete id="deleteNewJournalDetail">
+        DELETE FROM NEW_JOURNAL_DETAIL WHERE journal_detail_no = #{journalDetailNo}
+    </delete>
+
+    <!-- insert -->
+    <insert id="insertNewJournalDetail" parameterType="kr.co.seoulit.erp.account.slip.to.NewJournalDetailBean">
+        INSERT INTO NEW_JOURNAL_DETAIL
+        (journal_detail_no, journal_no, account_control_type, account_control_name, account_control_code, journal_description, account_name)
+        VALUES
+            (#{journalDetailNo}, #{journalNo}, #{accountControlType}, #{accountControlName}, #{accountControlCode}, #{journalDescription}, #{accountName})
+    </insert>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed Feb 26 09:48:29 KST 2020-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.erp.account.base.dao.AccCustomerJournalDAO">
+
+
+	<resultMap id="customerJournalResult" type="kr.co.seoulit.erp.account.base.to.CustomerJournalBean">
+		<result property="slipNo" column="SLIP_NO"/>
+		<result property="approvalDate" column="APPROVAL_DATE"/>
+		<result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO"/>
+		<result property="accountName" column="ACCOUNT_NAME"/>
+		<result property="balanceDivision" column="BALANCE_DIVISION"/>
+		<result property="customerCode" column="CUSTOMER_CODE"/>
+		<result property="leftDebtorPrice" column="LEFT_DEBTOR_PRICE"/>
+		<result property="rightCreditsPrice" column="RIGHT_CREDITS_PRICE"/>
+		<result property="expenseReport" column="EXPENSE_REPORT"/>
+	</resultMap>
+
+
+
+	<select id="findCustomerJournalList" parameterType="String"
+			resultMap="customerJournalResult">
+    <![CDATA[
+		SELECT
+			j.slip_no AS SLIP_NO,
+			s.approval_date AS APPROVAL_DATE,
+			s.account_period_no AS ACCOUNT_PERIOD_NO,
+			a.account_name AS ACCOUNT_NAME,
+			j.balance_division AS BALANCE_DIVISION,
+			j.customer_code AS CUSTOMER_CODE,
+			TO_CHAR(j.LEFT_DEBTOR_PRICE,'FM999,999,999,999') AS LEFT_DEBTOR_PRICE,
+			TO_CHAR(j.RIGHT_CREDITS_PRICE,'FM999,999,999,999') AS RIGHT_CREDITS_PRICE,
+			s.expense_report AS EXPENSE_REPORT
+
+--  			TO_CHAR(NVL(j.LEFT_DEBTOR_PRICE, 0), 'FM999,999,999,999') AS LEFT_DEBTOR_PRICE,
+--  			TO_CHAR(NVL(j.RIGHT_CREDITS_PRICE, 0), 'FM999,999,999,999') AS RIGHT_CREDITS_PRICE
+		FROM
+			journal j
+				JOIN
+			slip s ON j.slip_no = s.slip_no
+				JOIN
+			account a ON j.account_inner_code = a.account_inner_code
+		WHERE
+			j.customer_code = #{customerCodes}
+		  AND s.approval_date BETWEEN #{fromDate} AND #{toDate}
+        ORDER BY  j.journal_no desc
+
+		]]>
+</select>
+
+
+
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed Feb 26 09:48:31 KST 2020-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.erp.account.statement.dao.IncomeStatementDAO">
+
+    <resultMap id="incomeStatementResult" type="kr.co.seoulit.erp.account.statement.to.IncomeStatementBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_No" />
+        <result property="lev" column="LEV" />
+        <result property="accountInnerCode" column="CODE" />
+        <result property="accountName" column="ACC_NAME" />
+        <result property="cTotal1" column="LEV3CURRENTTOTAL" />
+        <result property="cTotal2" column="OTHERLEVCURRENTTOTAL" />
+        <result property="pTotal1" column="LEV3PRETOTAL" />
+        <result property="pTotal2" column="OTHERLEVPRETOTAL" />
+    </resultMap>
+
+    <resultMap id="accountingSettlementStatusBeanResult" type="kr.co.seoulit.erp.account.statement.to.AccountingSettlementStatusBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO" />
+        <result property="totalTrialBalance" column="TOTAL_TRIAL_BALANCE1"/>
+        <result property="incomeStatement" column="INCOME_STATEMENT"/>
+        <result property="financialPosition" column="FINANCIAL_POSITION"/>
+        <result property="capitalStatement" column="CAPITAL_STATEMENT"/>
+    </resultMap>
+
+
+
+
+    <resultMap id="abc" type="kr.co.seoulit.erp.account.statement.to.IncomeStatementTestBean">
+        <result property="accountInnerCode" column="ACCOUNT_INNER_CODE" />
+        <result property="accountName" column="ACCOUNT_NAME"/>
+        <result property="totalAmount" column="TOTAL_AMOUNT"/>
+        <result property="periodNo" column="PERIOD_NO"/>
+        <result property="lev" column="LEV" />
+
+    </resultMap>
+
+
+    <!-- 1. 프로시저 호출 -->
+    <select id="callIncomeStatement"
+            parameterMap="incomeStatementParams"
+            statementType="CALLABLE">
+  <![CDATA[
+        { call P_TMP_INCOME_STATEMENT(?) }
+        ]]>
+</select>
+
+    <parameterMap id="incomeStatementParams" type="map">
+        <parameter property="searchPeriodNo" mode="IN" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <!-- 2. 결과 조회 -->
+    <select id="getIncomeStatementResult" resultMap="abc">
+        SELECT
+            ACCOUNT_INNER_CODE,
+            ACCOUNT_NAME,
+            NVL(INCOME, 0) + NVL(INCOME_SUMMARY, 0) AS TOTAL_AMOUNT,
+            PERIOD_NO,
+            LEV
+        FROM
+            TMP_INCOME_STATEMENTS2
+    </select>
+
+
+</mapper>

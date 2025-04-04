@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed Feb 26 09:48:31 KST 2020-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.erp.account.statement.dao.FinancialPositionDAO">
+
+    <resultMap id="financialPositionResult" type="kr.co.seoulit.erp.account.statement.to.FinancialPositionBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_No" />
+        <result property="lev" column="LEV" />
+        <result property="accountInnerCode" column="CODE" />
+        <result property="accountName" column="ACC_NAME" />
+        <result property="cTotal1" column="LEV3CURRENTTOTAL" />
+        <result property="cTotal2" column="OTHERLEVCURRENTTOTAL" />
+        <result property="pTotal1" column="LEV3PRETOTAL" />
+        <result property="pTotal2" column="OTHERLEVPRETOTAL" />
+    </resultMap>
+
+    <resultMap id="accountingSettlementStatusBeanResult" type="kr.co.seoulit.erp.account.statement.to.AccountingSettlementStatusBean">
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO" />
+        <result property="totalTrialBalance" column="TOTAL_TRIAL_BALANCE1"/>
+        <result property="incomeStatement" column="INCOME_STATEMENT"/>
+        <result property="financialPosition" column="FINANCIAL_POSITION"/>
+        <result property="capitalStatement" column="CAPITAL_STATEMENT"/>
+    </resultMap>
+
+    <parameterMap id="financialPositionParams" type="java.util.HashMap">
+        <parameter property="accountPeriodNo" jdbcType="VARCHAR" javaType="java.lang.String" mode="IN" />
+        <parameter property="earlyNo" jdbcType="NUMERIC" javaType="String" mode="IN" />
+        <parameter property="financialPosition" jdbcType="CURSOR" javaType="java.sql.ResultSet" mode="OUT"
+                   resultMap="financialPositionResult"/>
+    </parameterMap>
+    <!-- 프로시저호출 -->
+    <select id="selectcallFinancialPosition" parameterMap="financialPositionParams"  statementType="CALLABLE"  >
+      <![CDATA[
+        {call P_STATEMENT_STATUS_COMBINED(?, ?, ?)}
+        ]]>
+   </select>
+
+</mapper>

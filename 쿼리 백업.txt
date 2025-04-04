@@ -1,0 +1,4816 @@
+*****************************************총 계정원장***********************************************
+--일자별 총 계정원장
+SELECT s.REPORTING_DATE AS REPORTING_DATE, -- 작성일자
+       SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액
+       SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE , -- 대변금액
+       SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS Total_Balance
+  FROM SLIP S  --전표
+  , JOURNAL J  --분개
+  , ACCOUNT A  --계정과목
+ WHERE S.SLIP_NO = J.SLIP_NO
+   AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+   AND S.REPORTING_DATE BETWEEN '2023-01-01' AND '2023-01-31'
+   AND S.SLIP_STATUS = '승인'
+   AND a.ACCOUNT_NAME = '현금'
+GROUP BY s.REPORTING_DATE 
+ORDER BY S.REPORTING_DATE;       
+
+--월별 총 계정원장
+SELECT 
+    '2023-01' AS REPORTING_DATE, -- 작성일자
+    SUM(LEFT_DEBIT_PRICE) AS LEFT_DEBIT_PRICE, -- 차변금액 총합
+    SUM(RIGHT_CREDIT_PRICE) AS RIGHT_CREDIT_PRICE, -- 대변금액 총합
+    SUM(TOTAL_BALANCE) AS TOTAL_BALANCE -- 총 잔액 총합
+FROM (
+    SELECT 
+        TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS REPORTING_DATE, -- 작성일자
+        SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+        SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE , -- 대변금액 합계
+        SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+    FROM 
+        SLIP S, --전표
+        JOURNAL J, --분개
+        ACCOUNT A --계정과목
+    WHERE 
+        S.SLIP_NO = J.SLIP_NO
+        AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+        AND S.REPORTING_DATE BETWEEN '2023-01-01' AND '2023-01-31'
+        AND S.SLIP_STATUS = '승인'
+        AND a.ACCOUNT_NAME = '현금'
+    GROUP BY 
+        TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
+) subquery
+GROUP BY 
+    '2023-01';
+    
+    
+  --------------------------------마이바티스로 보내보자-------------------------------- 
+--일자별 총 계정원장
+SELECT s.REPORTING_DATE AS REPORTING_DATE, -- 작성일자
+       SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액
+       SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE , -- 대변금액
+       SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS Total_Balance
+  FROM SLIP S  --전표
+  , JOURNAL J  --분개
+  , ACCOUNT A  --계정과목
+ WHERE S.SLIP_NO = J.SLIP_NO
+   AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+   AND S.REPORTING_DATE BETWEEN --{시작날짜} AND {종료날짜}
+   AND S.SLIP_STATUS = '승인'
+   AND a.ACCOUNT_NAME = --{검색과목}
+GROUP BY s.REPORTING_DATE 
+ORDER BY S.REPORTING_DATE;       
+
+--월별 총 계정원장
+SELECT 
+    REPORTING_DATE, -- 작성일자
+    SUM(LEFT_DEBIT_PRICE) AS LEFT_DEBIT_PRICE, -- 차변금액 총합
+    SUM(RIGHT_CREDIT_PRICE) AS RIGHT_CREDIT_PRICE, -- 대변금액 총합
+    SUM(TOTAL_BALANCE) AS TOTAL_BALANCE -- 총 잔액 총합
+FROM (
+    SELECT 
+        TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS REPORTING_DATE, -- 작성일자
+        SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+        SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE , -- 대변금액 합계
+        SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+    FROM 
+        SLIP S, --전표
+        JOURNAL J, --분개
+        ACCOUNT A --계정과목
+    WHERE 
+        S.SLIP_NO = J.SLIP_NO
+        AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+   		  AND S.REPORTING_DATE BETWEEN '2024-05-17' AND '2024-05-17'
+        AND S.SLIP_STATUS = '승인'
+        AND a.ACCOUNT_INNER_CODE = '0101'
+    GROUP BY 
+        TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
+) 
+GROUP BY 
+    REPORTING_DATE;
+    
+    
+    
+SELECT
+            REPORTING_DATE, -- 작성일자
+            SUM(LEFT_DEBIT_PRICE) AS LEFT_DEBIT_PRICE, -- 차변금액 총합
+            SUM(RIGHT_CREDIT_PRICE) AS RIGHT_CREDIT_PRICE, -- 대변금액 총합
+            SUM(TOTAL_BALANCE) AS TOTAL_BALANCE -- 총 잔액 총합
+        FROM (
+                 SELECT
+                     TO_CHAR(TO_DATE(S.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS REPORTING_DATE, -- 작성일자
+                     SUM(TO_NUMBER(REPLACE(J.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+                     SUM(TO_NUMBER(REPLACE(J.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE , -- 대변금액 합계
+                     SUM(TO_NUMBER(REPLACE(J.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(J.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+                 FROM
+                     SLIP S, --전표
+                     JOURNAL J, --분개
+                     ACCOUNT A --계정과목
+                 WHERE
+                     S.SLIP_NO = J.SLIP_NO
+                   AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+                   AND S.REPORTING_DATE BETWEEN '2023-01-01' AND '2023-01-31'
+                   AND S.SLIP_STATUS = '승인'
+                   AND A.ACCOUNT_INNER_CODE = '0101'
+                 GROUP BY
+                     TO_CHAR(TO_DATE(S.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
+             )
+        GROUP BY
+            REPORTING_DATE
+        ORDER BY
+            REPORTING_DATE    
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+SELECT value
+FROM v$nls_parameters
+WHERE parameter = 'NLS_DATE_FORMAT';            
+            
+
+SELECT 
+    TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM') AS REPORTING_MONTH, -- 작성월
+    SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+    SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE, -- 대변금액 합계
+    SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+FROM 
+    SLIP S, -- 전표
+    JOURNAL J, -- 분개
+    ACCOUNT A -- 계정과목
+WHERE 
+    S.SLIP_NO = J.SLIP_NO
+    AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+    AND TO_DATE(S.REPORTING_DATE, 'YYYY-MM-DD') BETWEEN TO_DATE('2023-01-01', 'YYYY-MM-DD') AND TO_DATE('2023-12-31', 'YYYY-MM-DD')
+    AND S.SLIP_STATUS = '승인'
+    AND a.ACCOUNT_NAME = '현금'
+GROUP BY 
+    TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM')
+ORDER BY 
+    TO_CHAR(TO_DATE(s.REPORTING_DATE, 'YYYY-MM-DD'), 'YYYY-MM');        
+            
+            
+            
+            
+            
+            
+SELECT 
+    SUBSTR(s.REPORTING_DATE, 1, 7) AS REPORTING_DATE, -- 작성월
+    SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+    SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE, -- 대변금액 합계
+    SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+FROM 
+    SLIP S, -- 전표
+    JOURNAL J, -- 분개
+    ACCOUNT A -- 계정과목
+WHERE 
+    S.SLIP_NO = J.SLIP_NO
+    AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+    AND S.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate}
+    AND S.SLIP_STATUS = '승인'
+    AND A.ACCOUNT_INNER_CODE = #{accountCode}
+GROUP BY 
+    SUBSTR(s.REPORTING_DATE, 1, 7)
+ORDER BY 
+    SUBSTR(s.REPORTING_DATE, 1, 7);         
+
+
+
+
+SELECT
+            SUBSTR(s.REPORTING_DATE, 1, 7) AS REPORTING_DATE, -- 작성월
+            SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) AS LEFT_DEBIT_PRICE, -- 차변금액 합계
+            SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS RIGHT_CREDIT_PRICE, -- 대변금액 합계
+            SUM(TO_NUMBER(REPLACE(j.LEFT_DEBTOR_PRICE, ',', ''))) - SUM(TO_NUMBER(REPLACE(j.RIGHT_CREDITS_PRICE, ',', ''))) AS TOTAL_BALANCE -- 총 잔액
+        FROM
+            SLIP S, -- 전표
+            JOURNAL J, -- 분개
+            ACCOUNT A -- 계정과목
+        WHERE
+            S.SLIP_NO = J.SLIP_NO
+          AND J.ACCOUNT_INNER_CODE = A.ACCOUNT_INNER_CODE
+          AND S.REPORTING_DATE BETWEEN #{fromDate} AND #{toDate}
+          AND S.SLIP_STATUS = '승인'
+          AND A.ACCOUNT_INNER_CODE = #{accountCode}
+        GROUP BY
+            SUBSTR(s.REPORTING_DATE, 1, 7)
+        ORDER BY
+            SUBSTR(s.REPORTING_DATE, 1, 7)
+
+
+
+
+*****************************************합계잔액시산표***********************************************
+SELECT * 
+  FROM ACCOUNT
+ WHERE ACCOUNT_NAME = '영업외수익'
+ 
+ SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+               AND S.ACCOUNT_PERIOD_NO = 3
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'
+               --승인인것
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+               
+               
+SELECT
+    A.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+    A.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+    A.ACCOUNT_NAME AS A_NAME,
+    SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)) AS DEBITS,
+    SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)) AS CREDITS
+FROM
+    ACCOUNT A
+    JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+    JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 3
+    AND S.SLIP_STATUS = '승인'
+--    AND A.ACCOUNT_NAME = '영업외수익'
+GROUP BY
+	  A.ACCOUNT_INNER_CODE,
+    A.ACCOUNT_CHARACTER,
+    A.ACCOUNT_NAME;
+    
+            SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS,
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+               j.journal_no
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+--               AND S.ACCOUNT_PERIOD_NO = 3
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'
+               AND A3.ACCOUNT_NAME = '영업외수익'
+               --승인인것
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+
+
+
+SELECT *
+FROM JOURNAL
+--WHERE ACCOUNT_INNER_CODE = '0401-0999';
+WHERE ACCOUNT_name = '이자수익';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT
+    1 AS ACCOUNT_PERIOD_NO,
+   /*  레벨링   ↓*/
+               --p_seq_val AS SEQUENCE_NO,
+   LEV,
+   /*  조인코드 ↓*/
+    CODE,
+   /*  차변잔액 ↓*/
+   DEBITS_SUM_BALANCE,
+   /*  차변합계 ↓*/
+   DEBITS_SUM,
+   /*  계정과목 ↓*/
+   ACCOUNT_NAME,
+   /*  대변합계 ↓*/
+   CREDITS_SUM,
+   /*  대변잔액 ↓*/
+   CREDITS_SUM_BALANCE
+   --값이 있는것만 조회하면서 내림차순 정렬
+FROM
+   (
+   SELECT
+      -- TABLE5
+    /*  레벨링   */
+      LEV,
+      /*  조인코드 */
+      CODE,
+      /*  차변잔액 */
+      DEBITS_SUM_BALANCE,
+      /*  차변합계 */
+      DEBITS_SUM,
+      DECODE(CONTRA_ACCOUNT, 'Y', '└') || A1.ACCOUNT_NAME AS ACCOUNT_NAME,
+      --차감인 계정 ㄴ달아주는거
+    /*  대변합계 */
+      CREDITS_SUM,
+      /*  대변잔액 */
+      CREDITS_SUM_BALANCE
+   FROM
+      ACCOUNT A1,
+      (
+      SELECT
+         -- TABLE4
+       /*레벨링*/
+         --ex)자본이면 레벨1  유동자산 무형자산은 레밸2 나머지 자본목에 속하는 최하위 계정과목은 3이 된다.
+       CASE
+            WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN 2
+            WHEN APPEND_CODE IS NOT NULL THEN 1
+         END AS LEV,
+         /*조인코드*/
+         CASE
+            --순서대로 값이 있는것부터 코드를 지정, 레벨별로 나눠서 계정코드를 할당
+            WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN DETAIL_APPEND_CODE
+            WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+         END AS CODE,
+         /*  참조코드 ↓*/
+         APPEND_CODE,
+         /*상세참조코드↓*/
+         DETAIL_APPEND_CODE,
+         /*  ACCOUNT_CODE ↓*/
+         ACCOUNT_CODE,
+         /*  차변잔액 ↓*/
+         DECODE( SIGN(SUM(DEBITS)-SUM(CREDITS) ), 1 , SUM(DEBITS)-SUM(CREDITS) , 0 )
+         --SIGN 양수면1 , 음수면 -1
+                   AS DEBITS_SUM_BALANCE,
+         /*  차변합계 ↓*/
+         SUM(DEBITS) AS DEBITS_SUM,
+         /*  대변합계 ↓*/
+         SUM(CREDITS)AS CREDITS_SUM,
+         /*  대변잔액 ↓*/
+         DECODE(SIGN(SUM(CREDITS)-SUM(DEBITS) ), 1, SUM(CREDITS)-SUM(DEBITS), 0 )
+                   AS CREDITS_SUM_BALANCE,
+         /*  차감계정 ↓*/
+         CASE
+            WHEN ACCOUNT_CODE IS NOT NULL
+            AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+            ELSE 'N'
+         END AS CONTRA_ACCOUNT
+      FROM
+         (
+         --ROLLUP해줌
+         SELECT
+            -- TABLE2
+          /*  참조코드 ↓*/
+            APPEND_CODE,
+            /*상세참조코드↓*/
+            DETAIL_APPEND_CODE,
+            /*  계정코드 ↓*/
+            ACCOUNT_CODE,
+            /*  차변금액 ↓*/
+            DEBITS,
+            /*  대변금액 ↓*/
+            CREDITS,
+            /*   구분   ↓*/
+            ACCOUNT_CHARACTER
+         FROM
+            (
+            --**********************************************************************************************************************************
+            --전기 당기 이익잉여금 합
+            --**********************************************************************************************************************************
+            --당기-------------------------------------------
+            SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+               AND S.ACCOUNT_PERIOD_NO = 1
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'
+               --승인인것
+--               AND j.account_inner_code IS NOT NULL
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+               --자식(유형)와 부모(비유동)매칭
+--               AND j.account_inner_code IS NOT NULL;
+            /*
+               선택된 period_num에 있는 '승인'된 전표에 적혀 있는 분개에서 계정코드가 같은 것들의
+               부모코드, 참조코드, 상세참조코드, 계정코드, 구분(그룹명), 계정과목, 차변금액, 대변금액을 조회한다.
+
+            */
+               )
+            -- 롤업하기 전 필요한 컬럼만 선택을 한다.
+   				)
+--   		WHERE ACCOUNT_CODE != '0901'
+      GROUP BY
+         ROLLUP( APPEND_CODE,
+         DETAIL_APPEND_CODE,
+         ACCOUNT_CODE )
+         --롤업으로 부모계정별 차,대변 합계가 계산 된다.
+    ) A2
+   WHERE
+      A1.ACCOUNT_INNER_CODE(+) = A2.CODE
+--      -- 일반 계정과목을 아우터 조인으로 연결하여 code에 맞는 계정명을 붙여 준다.
+--      -- 차감 금액에는 ㄴ을 붙여준다.
+)
+WHERE
+   DEBITS_SUM>0
+   OR CREDITS_SUM>0
+ORDER BY
+   SUBSTR(CODE, 1, 4),
+   SUBSTR(CODE, 6) DESC NULLS LAST;
+
+
+         SELECT
+            -- TABLE2
+          /*  참조코드 ↓*/
+            APPEND_CODE,
+            /*상세참조코드↓*/
+            DETAIL_APPEND_CODE,
+            /*  계정코드 ↓*/
+            ACCOUNT_CODE,
+            /*  차변금액 ↓*/
+            DEBITS,
+            /*  대변금액 ↓*/
+            CREDITS,
+            /*   구분   ↓*/
+            ACCOUNT_CHARACTER
+         FROM
+            (
+            --**********************************************************************************************************************************
+            --전기 당기 이익잉여금 합
+            --**********************************************************************************************************************************
+            --당기-------------------------------------------
+            SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+               AND S.ACCOUNT_PERIOD_NO = 3
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'               
+               AND a3.account_inner_code = '0931'
+               --승인인것
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+) ;
+               --자식(유형)와 부모(비유동)매칭
+            /*
+               선택된 period_num에 있는 '승인'된 전표에 적혀 있는 분개에서 계정코드가 같은 것들의
+               부모코드, 참조코드, 상세참조코드, 계정코드, 구분(그룹명), 계정과목, 차변금액, 대변금액을 조회한다.
+
+            */
+               )
+            -- 롤업하기 전 필요한 컬럼만 선택을 한다.
+  
+  
+  
+SELECT
+    LEV,
+    CODE,
+    APPEND_CODE,
+    DETAIL_APPEND_CODE,
+    ACCOUNT_CODE,
+    DEBITS_SUM_BALANCE,
+    DEBITS_SUM,
+    CREDITS_SUM,
+    CREDITS_SUM_BALANCE,
+    CONTRA_ACCOUNT
+FROM (
+    SELECT
+        CASE
+            WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN 2
+            WHEN APPEND_CODE IS NOT NULL THEN 1
+        END AS LEV,
+        CASE
+            WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN DETAIL_APPEND_CODE
+            WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+        END AS CODE,
+        APPEND_CODE,
+        DETAIL_APPEND_CODE,
+        ACCOUNT_CODE,
+        DECODE(SIGN(SUM(DEBITS) - SUM(CREDITS)), 1, SUM(DEBITS) - SUM(CREDITS), 0) AS DEBITS_SUM_BALANCE,
+        SUM(DEBITS) AS DEBITS_SUM,
+        SUM(CREDITS) AS CREDITS_SUM,
+        DECODE(SIGN(SUM(CREDITS) - SUM(DEBITS)), 1, SUM(CREDITS) - SUM(DEBITS), 0) AS CREDITS_SUM_BALANCE,
+        CASE
+            WHEN ACCOUNT_CODE IS NOT NULL AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+            ELSE 'N'
+        END AS CONTRA_ACCOUNT
+    FROM (
+        SELECT
+            APPEND_CODE,
+            DETAIL_APPEND_CODE,
+            ACCOUNT_CODE,
+            DEBITS,
+            CREDITS,
+            ACCOUNT_CHARACTER
+        FROM (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+                A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+                A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+                A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+                A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+                A3.ACCOUNT_NAME AS A3_NAME,
+                NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+            FROM
+                ACCOUNT A1,
+                ACCOUNT A2,
+                ACCOUNT A3,
+                SLIP S,
+                JOURNAL J
+            WHERE
+                S.SLIP_NO = J.SLIP_NO
+                AND S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+                AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+                AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+                AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+        )
+    )
+    GROUP BY
+        ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+    HAVING
+        (GROUPING(APPEND_CODE) = 1 AND GROUPING(DETAIL_APPEND_CODE) = 1 AND GROUPING(ACCOUNT_CODE) = 1)
+        OR (GROUPING(APPEND_CODE) = 0 AND GROUPING(DETAIL_APPEND_CODE) = 0 AND GROUPING(ACCOUNT_CODE) = 0)
+        OR (GROUPING(APPEND_CODE) = 0 AND GROUPING(DETAIL_APPEND_CODE) = 0 AND GROUPING(ACCOUNT_CODE) = 1)
+        OR (GROUPING(APPEND_CODE) = 0 AND GROUPING(DETAIL_APPEND_CODE) = 1 AND GROUPING(ACCOUNT_CODE) = 1)
+)
+ORDER BY
+    LEV, CODE;
+    
+
+--혹시 분개가 전표 하나에 하나밖에 안들어간 항목이 있는지, 테이블의 1대다 검토 : 문제 없음
+SELECT slip_no
+FROM Journal
+GROUP BY slip_no
+HAVING COUNT(*) = 1;
+
+
+--분개가 제대로 되있는지 확인하는 쿼리 : 2023년 전표 하나 말고 문제 없음
+SELECT SLIP_NO
+FROM (
+    SELECT SLIP_NO,
+           SUM(DECODE(BALANCE_DIVISION, '차변', LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBIT,
+           SUM(DECODE(BALANCE_DIVISION, '대변', RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDIT
+    FROM JOURNAL
+    GROUP BY SLIP_NO
+)
+WHERE TOTAL_DEBIT != TOTAL_CREDIT;
+
+
+
+
+
+SELECT
+    APPEND_CODE,
+    DETAIL_APPEND_CODE,
+    ACCOUNT_CODE,
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE
+FROM (
+    SELECT
+        A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+        A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+        A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+        A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+HAVING SUM(DEBITS) != SUM(CREDITS);
+
+
+
+
+SELECT
+    APPEND_CODE,
+    DETAIL_APPEND_CODE,
+    ACCOUNT_CODE,
+    TOTAL_DEBITS,
+    TOTAL_CREDITS,
+    BALANCE
+FROM (
+    SELECT
+        APPEND_CODE,
+        DETAIL_APPEND_CODE,
+        ACCOUNT_CODE,
+        SUM(DEBITS) AS TOTAL_DEBITS,
+        SUM(CREDITS) AS TOTAL_CREDITS,
+        SUM(DEBITS) - SUM(CREDITS) AS BALANCE
+    FROM (
+        SELECT
+            A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+            A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+            A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+            A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+        FROM
+            ACCOUNT A1
+            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+        WHERE
+            S.ACCOUNT_PERIOD_NO = 3
+            AND S.SLIP_STATUS = '승인'
+    )
+    GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+    HAVING SUM(DEBITS) != SUM(CREDITS)
+)
+ORDER BY BALANCE DESC;
+
+
+
+SELECT
+    S.SLIP_NO,
+    J.ACCOUNT_INNER_CODE,
+    J.LEFT_DEBTOR_PRICE,
+    J.RIGHT_CREDITS_PRICE,
+    J.JOURNAL_NO
+FROM
+    JOURNAL J
+    JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 3
+    AND S.SLIP_STATUS = '승인'
+    AND J.ACCOUNT_INNER_CODE IN (
+        SELECT ACCOUNT_CODE
+        FROM (
+            SELECT ACCOUNT_CODE
+            FROM (
+                SELECT
+                    A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+                    A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+                    A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+                    A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+                    NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                    NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                FROM
+                    ACCOUNT A1
+                    LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                    LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                    LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                WHERE
+                    S.ACCOUNT_PERIOD_NO = 3
+                    AND S.SLIP_STATUS = '승인'
+            )
+            GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+            HAVING SUM(DEBITS) != SUM(CREDITS)
+        )
+    );
+    
+    
+SELECT
+    ACCOUNT_CODE,
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        A1.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY ACCOUNT_CODE
+HAVING SUM(DEBITS) != SUM(CREDITS);
+
+
+SELECT
+    SLIP_NO,
+    ACCOUNT_CODE,
+    DEBITS,
+    CREDITS
+FROM (
+    SELECT
+        S.SLIP_NO,
+        A1.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+)
+WHERE ACCOUNT_CODE = '0901'
+ORDER BY SLIP_NO;
+
+SELECT
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        JOURNAL J
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+);
+
+--20만원 차이나는 테이블의 계정과목별 차대변 차이------------------------------------------------------------------
+SELECT
+    ACCOUNT_CODE,
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY ACCOUNT_CODE
+HAVING SUM(DEBITS) != SUM(CREDITS);
+--20만원 차이나는 테이블의 계정과목별 차대변 차이의 합계------------------------------------------------------------------
+WITH Filtered_Journal AS (
+    SELECT
+        S.SLIP_NO,
+        J.ACCOUNT_INNER_CODE,
+        J.LEFT_DEBTOR_PRICE AS DEBITS,
+        J.RIGHT_CREDITS_PRICE AS CREDITS,
+        J.JOURNAL_NO
+    FROM
+        JOURNAL J
+        JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+        AND J.ACCOUNT_INNER_CODE IN (
+            SELECT ACCOUNT_CODE
+            FROM (
+                SELECT ACCOUNT_CODE
+                FROM (
+                    SELECT
+                        A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+                        A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+                        A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+                        A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 3
+                        AND S.SLIP_STATUS = '승인'
+                )
+                GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+                HAVING SUM(DEBITS) != SUM(CREDITS)
+            )
+        )
+)
+SELECT
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM
+    Filtered_Journal;
+--20만원 차이 안나는 테이블의 계정과목별 차대변 차이------------------------------------------------------    
+SELECT
+    J.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+    SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBITS,
+    SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDITS,
+    SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)) - SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)) AS BALANCE_DIFFERENCE
+FROM
+    JOURNAL J
+    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 3
+    AND S.SLIP_STATUS = '승인'
+GROUP BY J.ACCOUNT_INNER_CODE
+ORDER BY ACCOUNT_CODE;    
+--20만원 차이 안나는 테이블의 계정과목별 차대변 차이 합계-----------------------------------------------------
+SELECT
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        JOURNALt J
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 3
+        AND S.SLIP_STATUS = '승인'
+--        AND J.ACCOUNT_INNER_CODE != 'NULL'
+-- 				이 부분이 연관이 있음. 위 주석을 풀고 나온 합계가 20만 오차 테이블과 가격이 일치함. 근데 그것도 대변 한정임. 문제가 뭐야...
+);
+--그래서 NULL인 과목을 3기수에서 추출해봄-------------------------------------------------------
+SELECT *
+FROM JOURNAL J
+    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 3
+    AND S.SLIP_STATUS = '승인'
+    AND J.ACCOUNT_INNER_CODE IS NULL;
+--이건 전기수에서 승인/미결 상관없이 추출한거-------------------------------------------------------
+SELECT *
+FROM JOURNAL J
+    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    J.ACCOUNT_INNER_CODE IS NULL;
+------------------------------------------------------------
+SELECT *
+FROM JOURNAL J
+--LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE J.JOURNAL_NO LIKE '2022%'
+  AND J.ACCOUNT_INNER_CODE IS NULL;
+  
+  
+  
+  
+  
+    
+--그렇다면 null이 문제인가 해서 null이 들어간 분개가 삭제된 테이블을 만들어 테스트 해봤지만 20만 차이는 사라지지 않았음
+--근데 이건 생각해보면 당연한게 null인 항목들이 차대변이 어긋나지는 않았기때문에 아무 영향없는게 당연함
+--공부하다 뇌정지와서 무지성 시도한듯..
+CREATE TABLE Journalt AS
+SELECT * FROM Journal
+
+DELETE FROM JOURNALt 
+WHERE JOURNAL_NO LIKE '2022%'
+  AND ACCOUNT_INNER_CODE IS NULL;
+
+-- 맞는 테이블과 틀린 테이블의 계정과목을 일일이 대조 비교한 결과   
+-- 문제가 되는건 931 코드 과목이었음. 20만 차이가 없는 테이블은 차변에 931 과목으로 20만원을 가지고 있었다.
+
+-- account 테이블에 931이 없다?
+SELECT *
+FROM ACCOUNt
+WHERE account_inner_code ='931'
+
+--문제가 되는 전표는 20220131SLIP00018/분개번호는 해당전표의 1번
+--이자비용 이라는 과목의 차변이었음. 이 과목의 합산 과정에서 반영되지 않았던 거임. 931이란 과목은 없으니까 account 3개 테이블 조인 과정에서 날라간거지!
+--시발 드디어 원인 찾음 개같은거 시부랄거 ㅈ같은거 ㅈㄴ 개같은거
+SELECT *
+FROM JOURNAL J
+LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE J.JOURNAL_NO LIKE '2022%'
+  AND J.ACCOUNT_INNER_CODE = '0931';
+  
+  
+-------------------------------------------------자 그럼 2023년의 차이도 잡아보자-------------------------------------------------
+--20만원 차이나는 테이블의 계정과목별 차대변 차이------------------------------------------------------------------
+SELECT
+    ACCOUNT_CODE,
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 4
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY ACCOUNT_CODE
+HAVING SUM(DEBITS) != SUM(CREDITS);
+--20만원 차이 안나는 테이블의 계정과목별 차대변 차이------------------------------------------------------    
+SELECT
+    J.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+    SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBITS,
+    SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDITS,
+    SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)) - SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)) AS BALANCE_DIFFERENCE
+FROM
+    JOURNAL J
+    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 1
+    AND S.SLIP_STATUS = '승인'
+GROUP BY J.ACCOUNT_INNER_CODE
+ORDER BY ACCOUNT_CODE;    
+--20만원 차이나는 테이블의 계정과목별 차대변 차이의 합계------------------------------------------------------------------
+WITH Filtered_Journal AS (
+    SELECT
+        S.SLIP_NO,
+        J.ACCOUNT_INNER_CODE,
+        J.LEFT_DEBTOR_PRICE AS DEBITS,
+        J.RIGHT_CREDITS_PRICE AS CREDITS,
+        J.JOURNAL_NO
+    FROM
+        JOURNAL J
+        JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 4
+        AND S.SLIP_STATUS = '승인'
+        AND J.ACCOUNT_INNER_CODE IN (
+            SELECT ACCOUNT_CODE
+            FROM (
+                SELECT ACCOUNT_CODE
+                FROM (
+                    SELECT
+                        A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+                        A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+                        A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+                        A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 3
+                        AND S.SLIP_STATUS = '승인'
+                )
+                GROUP BY ROLLUP(APPEND_CODE, DETAIL_APPEND_CODE, ACCOUNT_CODE)
+--                HAVING SUM(DEBITS) != SUM(CREDITS)
+            )
+        )
+)
+SELECT
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM
+    Filtered_Journal;
+--20만원 차이 안나는 테이블의 계정과목별 차대변 차이 합계------------------------------------------------------
+SELECT
+    SUM(DEBITS) AS TOTAL_DEBITS,
+    SUM(CREDITS) AS TOTAL_CREDITS,
+    SUM(DEBITS) - SUM(CREDITS) AS BALANCE_DIFFERENCE
+FROM (
+    SELECT
+        NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        JOURNALt J
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 4
+        AND S.SLIP_STATUS = '승인'
+);
+----위 4개 쿼리 실행결과 차이 없음. 즉, 분개가 잘못됐을 확률이 높음
+
+
+--분개 검사 쿼리를 재실행 : 20231231SLIP00006 발견
+SELECT SLIP_NO
+FROM (
+    SELECT SLIP_NO,
+           SUM(DECODE(BALANCE_DIVISION, '차변', LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBIT,
+           SUM(DECODE(BALANCE_DIVISION, '대변', RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDIT
+    FROM JOURNAL
+    GROUP BY SLIP_NO
+)
+WHERE TOTAL_DEBIT != TOTAL_CREDIT;
+
+--분개 오차로 1980원 미스남 체크. 
+SELECT SLIP_NO,
+	SUM(DECODE(BALANCE_DIVISION, '차변', LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBIT,
+  SUM(DECODE(BALANCE_DIVISION, '대변', RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDIT
+  FROM JOURNAL
+ WHERE slip_no = '20231231SLIP00006'
+GROUP BY SLIP_NO
+
+
+--정리 : 프로시져는 잘못없음. 데이터의 문제.
+--2020/2021/2022 는 account테이블 내부에서의 931과목 부재
+--2023은 분개미스 가 잔액시산표 오류 범인임.
+
+
+CREATE TABLE accountt AS
+SELECT * FROM account
+
+SELECT *
+  FROM account 
+ WHERE account_character = '수입이자'
+
+
+INSERT INTO account (
+    account_inner_code,
+    parent_account_inner_code,
+    account_code,
+    account_character,
+    account_name,
+    account_display_name_with_code,
+    account_display_name,
+    account_division,
+    account_use_check,
+    account_description,
+    group_code,
+    editable,
+    budget,
+    fixed_assets
+) VALUES (
+    '0931',
+    '0931-0997',
+    '0931',
+    '지출이자',
+    '이자비용',
+    null,
+    null,
+    '차변',
+    null,
+    null,
+    '9.영업 외 비용',
+    0,
+    'F',
+    null
+);
+
+--4기수 문제의 전표
+SELECT SLIP_NO,
+	SUM(DECODE(BALANCE_DIVISION, '차변', LEFT_DEBTOR_PRICE, 0)) AS TOTAL_DEBIT,
+  SUM(DECODE(BALANCE_DIVISION, '대변', RIGHT_CREDITS_PRICE, 0)) AS TOTAL_CREDIT
+  FROM JOURNAL
+ WHERE slip_no = '20231231SLIP00006'
+GROUP BY SLIP_NO
+
+--4기수 문제 전표 수정
+UPDATE JOURNAL
+SET RIGHT_CREDITS_PRICE = 12000
+WHERE SLIP_NO = '20231231SLIP00006'
+  AND BALANCE_DIVISION = '대변'
+  AND RIGHT_CREDITS_PRICE = 10020;
+
+--account 코드번호 수정 - 내림차순 정리 잘되게
+UPDATE account
+SET account_inner_code = '0931-0997'
+WHERE ACCOUNT_inner_code = '0951-0997';
+
+COMMIT;
+
+SELECT *
+FROM account
+--WHERE ACCOUNT_INNER_CODE = '0401-0999';
+WHERE ACCOUNT_inner_code = '0931-0997';
+
+
+
+
+
+SELECT
+         -- TABLE4
+       /*레벨링*/
+         --ex)자본이면 레벨1  유동자산 무형자산은 레밸2 나머지 자본목에 속하는 최하위 계정과목은 3이 된다.
+       CASE
+            WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN 2
+            WHEN APPEND_CODE IS NOT NULL THEN 1
+         END AS LEV,
+         /*조인코드*/
+         CASE
+            --순서대로 값이 있는것부터 코드를 지정, 레벨별로 나눠서 계정코드를 할당
+            WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN DETAIL_APPEND_CODE
+            WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+         END AS CODE,
+         /*  참조코드 ↓*/
+         APPEND_CODE,
+         /*상세참조코드↓*/
+         DETAIL_APPEND_CODE,
+         /*  ACCOUNT_CODE ↓*/
+         ACCOUNT_CODE,
+         /*  차변잔액 ↓*/
+         DECODE( SIGN(SUM(DEBITS)-SUM(CREDITS) ), 1 , SUM(DEBITS)-SUM(CREDITS) , 0 )
+         --SIGN 양수면1 , 음수면 -1
+                   AS DEBITS_SUM_BALANCE,
+         /*  차변합계 ↓*/
+         SUM(DEBITS) AS DEBITS_SUM,
+         /*  대변합계 ↓*/
+         SUM(CREDITS)AS CREDITS_SUM,
+         /*  대변잔액 ↓*/
+         DECODE(SIGN(SUM(CREDITS)-SUM(DEBITS) ), 1, SUM(CREDITS)-SUM(DEBITS), 0 )
+                   AS CREDITS_SUM_BALANCE,
+         /*  차감계정 ↓*/
+         CASE
+            WHEN ACCOUNT_CODE IS NOT NULL
+            AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+            ELSE 'N'
+         END AS CONTRA_ACCOUNT
+      FROM
+         (
+         --ROLLUP해줌
+         SELECT
+            -- TABLE2
+          /*  참조코드 ↓*/
+            APPEND_CODE,
+            /*상세참조코드↓*/
+            DETAIL_APPEND_CODE,
+            /*  계정코드 ↓*/
+            ACCOUNT_CODE,
+            /*  차변금액 ↓*/
+            DEBITS,
+            /*  대변금액 ↓*/
+            CREDITS,
+            /*   구분   ↓*/
+            ACCOUNT_CHARACTER
+         FROM
+            (
+            --**********************************************************************************************************************************
+            --전기 당기 이익잉여금 합
+            --**********************************************************************************************************************************
+            --당기-------------------------------------------
+            SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+               AND S.ACCOUNT_PERIOD_NO = 3
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'
+               --승인인것
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+               --자식(유형)와 부모(비유동)매칭
+            /*
+               선택된 period_num에 있는 '승인'된 전표에 적혀 있는 분개에서 계정코드가 같은 것들의
+               부모코드, 참조코드, 상세참조코드, 계정코드, 구분(그룹명), 계정과목, 차변금액, 대변금액을 조회한다.
+
+            */
+               )
+            -- 롤업하기 전 필요한 컬럼만 선택을 한다.
+  				)
+		      GROUP BY
+		         ROLLUP( APPEND_CODE,
+		         DETAIL_APPEND_CODE,
+		         ACCOUNT_CODE );
+         --롤업으로 부모계정별 차,대변 합계가 계산 된다.
+    ) A2;
+
+
+
+SELECT
+    3 AS ACCOUNT_PERIOD_NO,
+   /*  레벨링   ↓*/
+               --p_seq_val AS SEQUENCE_NO,
+   LEV,
+   /*  조인코드 ↓*/
+    CODE,
+   /*  차변잔액 ↓*/
+   DEBITS_SUM_BALANCE,
+   /*  차변합계 ↓*/
+   DEBITS_SUM,
+   /*  계정과목 ↓*/
+   ACCOUNT_NAME,
+   /*  대변합계 ↓*/
+   CREDITS_SUM,
+   /*  대변잔액 ↓*/
+   CREDITS_SUM_BALANCE
+   --값이 있는것만 조회하면서 내림차순 정렬
+FROM
+   (
+   SELECT
+      -- TABLE5
+    /*  레벨링   */
+      LEV,
+      /*  조인코드 */
+      CODE,
+      /*  차변잔액 */
+      DEBITS_SUM_BALANCE,
+      /*  차변합계 */
+      DEBITS_SUM,
+      DECODE(CONTRA_ACCOUNT, 'Y', '└') || A1.ACCOUNT_NAME AS ACCOUNT_NAME,
+      --차감인 계정 ㄴ달아주는거
+    /*  대변합계 */
+      CREDITS_SUM,
+      /*  대변잔액 */
+      CREDITS_SUM_BALANCE
+   FROM
+      ACCOUNT A1,
+      (
+      SELECT
+         -- TABLE4
+       /*레벨링*/
+         --ex)자본이면 레벨1  유동자산 무형자산은 레밸2 나머지 자본목에 속하는 최하위 계정과목은 3이 된다.
+       CASE
+            WHEN ACCOUNT_CODE IS NOT NULL THEN 3
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN 2
+            WHEN APPEND_CODE IS NOT NULL THEN 1
+         END AS LEV,
+         /*조인코드*/
+         CASE
+            --순서대로 값이 있는것부터 코드를 지정, 레벨별로 나눠서 계정코드를 할당
+            WHEN ACCOUNT_CODE IS NOT NULL THEN ACCOUNT_CODE
+            WHEN DETAIL_APPEND_CODE IS NOT NULL THEN DETAIL_APPEND_CODE
+            WHEN APPEND_CODE IS NOT NULL THEN APPEND_CODE
+         END AS CODE,
+         /*  참조코드 ↓*/
+         APPEND_CODE,
+         /*상세참조코드↓*/
+         DETAIL_APPEND_CODE,
+         /*  ACCOUNT_CODE ↓*/
+         ACCOUNT_CODE,
+         /*  차변잔액 ↓*/
+         DECODE( SIGN(SUM(DEBITS)-SUM(CREDITS) ), 1 , SUM(DEBITS)-SUM(CREDITS) , 0 )
+         --SIGN 양수면1 , 음수면 -1
+                   AS DEBITS_SUM_BALANCE,
+         /*  차변합계 ↓*/
+         SUM(DEBITS) AS DEBITS_SUM,
+         /*  대변합계 ↓*/
+         SUM(CREDITS)AS CREDITS_SUM,
+         /*  대변잔액 ↓*/
+         DECODE(SIGN(SUM(CREDITS)-SUM(DEBITS) ), 1, SUM(CREDITS)-SUM(DEBITS), 0 )
+                   AS CREDITS_SUM_BALANCE,
+         /*  차감계정 ↓*/
+         CASE
+            WHEN ACCOUNT_CODE IS NOT NULL
+            AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+            ELSE 'N'
+         END AS CONTRA_ACCOUNT
+      FROM
+         (
+         --ROLLUP해줌
+         SELECT
+            -- TABLE2
+          /*  참조코드 ↓*/
+            APPEND_CODE,
+            /*상세참조코드↓*/
+            DETAIL_APPEND_CODE,
+            /*  계정코드 ↓*/
+            ACCOUNT_CODE,
+            /*  차변금액 ↓*/
+            DEBITS,
+            /*  대변금액 ↓*/
+            CREDITS,
+            /*   구분   ↓*/
+            ACCOUNT_CHARACTER
+         FROM
+            (
+            --**********************************************************************************************************************************
+            --전기 당기 이익잉여금 합
+            --**********************************************************************************************************************************
+            --당기-------------------------------------------
+            SELECT
+               /*  부모코드 ↓*/
+               A1.PARENT_ACCOUNT_INNER_CODE AS PARENT_CODE,
+               --예시(0101-0250자산) 상위계정 내부코드
+             /*  참조코드 ↓*/
+               A1.ACCOUNT_INNER_CODE AS APPEND_CODE,
+               --예시(0176-0250비유동자산) 계정내부코드
+             /*상세참조코드↓*/
+               A2.ACCOUNT_INNER_CODE AS DETAIL_APPEND_CODE,
+               --예시(0195-0217유형자산) 계정내부코드
+             /*  계정코드 ↓*/
+               A3.ACCOUNT_INNER_CODE AS ACCOUNT_CODE,
+               --예시(0201토지) 계정내부코드
+             /*   구분   ↓*/
+               A3.ACCOUNT_CHARACTER AS ACCOUNT_CHARACTER,
+               --예시(비상) 계정그룹명
+             /*  계정과목 ↓*/
+               A3.ACCOUNT_NAME AS A3_NAME,
+               --예시(토지)   계정명
+             /*당기차변금액↓*/
+               NVL(j.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+               --예시(1000)   null이면 0이되는 차변
+             /*당기대변금액↓*/
+               NVL(j.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+               --예시(0,커플로 차변,대변 항목 있음) null이면 0이되는 대변
+            FROM
+               ACCOUNT A1,
+               ACCOUNT A2,
+               ACCOUNT A3,
+               --부모와 자식코드 매칭을 위해 3개 선언함
+               SLIP S,
+               --전표
+               JOURNAL J
+               --분개
+            WHERE
+               S.SLIP_NO = J.SLIP_NO
+               --전표와 분개의 기수가 같을 시(예를 들어6)
+               AND S.ACCOUNT_PERIOD_NO = 3
+               ----기수(6)
+               AND S.SLIP_STATUS = '승인'
+               --승인인것
+               AND A3.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+               AND A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE(+)
+               --자식(토지)와 부모(유형)매칭
+               AND A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE(+)
+               --자식(유형)와 부모(비유동)매칭
+            /*
+               선택된 period_num에 있는 '승인'된 전표에 적혀 있는 분개에서 계정코드가 같은 것들의
+               부모코드, 참조코드, 상세참조코드, 계정코드, 구분(그룹명), 계정과목, 차변금액, 대변금액을 조회한다.
+
+            */
+               )
+            -- 롤업하기 전 필요한 컬럼만 선택을 한다.
+   )
+      GROUP BY
+         ROLLUP( APPEND_CODE,
+         DETAIL_APPEND_CODE,
+         ACCOUNT_CODE )
+         --롤업으로 부모계정별 차,대변 합계가 계산 된다.
+    ) A2
+   WHERE
+      A1.ACCOUNT_INNER_CODE(+)= A2.CODE
+      -- 일반 계정과목을 아우터 조인으로 연결하여 code에 맞는 계정명을 붙여 준다.
+      -- 차감 금액에는 ㄴ을 붙여준다.
+)
+WHERE
+   DEBITS_SUM>0
+   OR CREDITS_SUM>0
+ORDER BY
+   SUBSTR(CODE, 1, 4),
+   SUBSTR(CODE, 6) DESC NULLS LAST
+);
+
+
+
+
+
+
+*****************************************재무상태표***********************************************
+-- 최상위 부모 계정들 조사
+SELECT *
+	FROM account
+-- WHERE PARENT_ACCOUNT_INNER_CODE IS NULL
+ where PARENT_ACCOUNT_INNER_CODE = '0931-0997';
+-- 0101-0250 : 자산 
+-- 0251-0330 : 부채
+-- 0331-0400 : 자본
+-- 0401-0999 : 손익
+-- 1000-1010 : 특수계정과목
+-- 0101-1000 : 계정
+-- 1~4번은 계정의 자식 / 5,6번이 최상위임
+
+-- 그룹코드가 존재하는지 조사
+SELECT *
+	FROM account
+ WHERE group_code LIKE '%판매%';
+ 
+ -- 특정코드의 코드 조사
+SELECT *
+	FROM account
+ WHERE account_inner_code = '0416';
+ 
+  -- 특정코드의 계정명 조사
+SELECT *
+	FROM account
+ WHERE parent_account_inner_code = '0381-0391';
+
+-- 계정명에 특정 계정이 존재하는지 테스트 
+SELECT *
+	FROM account
+ WHERE account_name LIKE '%III%';
+
+-- 영업외% : 영업외수익, 영업외비용
+-- 법인% : 법인세등/ 법인(소득)세등
+-- 손익의 부모 : 0101-1000 (계정 : 계정이름이 계정임;;)
+-- 매출원가 코드 : 0451-0470
+
+-- 매출 : 0401-0430
+-- 매출원가 : 0451-0470
+-- 판매비및일반관리비 :0801-0900
+-- 영업외수익 : 0901-0950
+-- 영업외비용 : 0931-0997
+-- 법인(소득)세등 : 0998-0999
+
+-- 매출 계정과목 조사
+SELECT *
+	FROM account
+ WHERE group_code LIKE '%매출'
+   AND account_name != '사용자설정계정과목';
+-- 403,406 다 매출할인인데 406은 account_character가 null임. 잘못 설계된 계정명이거나 차감에서 반영안하고 바로 반영하려는 의도로 설계된 코드일지도..?
+
+-- 그룹코드가 존재하는지 조사
+SELECT *
+	FROM account
+ WHERE account_character LIKE '%자본%';
+
+-- 손익계산서 출력과정에서 코드 조정이 있었기에 다시 변경
+UPDATE account
+SET PARENT_ACCOUNT_INNER_CODE = '0931-0997'
+WHERE PARENT_ACCOUNT_INNER_CODE = '0951-0997';
+
+
+
+
+--기타포괄손익누계액 계산을 위해 기타포괄손익으로 뺄만한 계정이 있나 검사해봤으나 찾지 못함
+--가장 대표적인 외환조차도 영업외이익/비용으로 분류되는데 이미 손익계산서 계산에 포함됐음.
+
+--차감 반영 테이블
+    SELECT
+        lev,
+        code,
+        CAST(NVL(a1.account_name, '합계') AS VARCHAR2(20)) AS acc_name,
+        ABS(total)
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                END AS code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.account_character AS account_character,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 4
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code;
+    
+    
+ --차감 반영 안한 테이블  
+        SELECT
+        lev,
+        code,
+        CAST(NVL(a1.account_name, '합계') AS VARCHAR2(20)) AS acc_name,
+        ABS(total)
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                END AS code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(DEBITS) AS DEBITS,
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.group_code AS group_name,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 1
+                        AND S.SLIP_STATUS = '승인'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code;
+ 
+ 
+-- 코드 바꿔가며 조회 : 계층구조 정리
+SELECT *
+	FROM account
+ WHERE account_inner_code = '0101-0250';
+ 
+--EX)
+-- 0416 : 매출할인 
+-- 부모 0401-0430 : 매출
+-- 할배 0401-0999 : 손익
+
+--EX2)
+-- 0101 : 현금
+-- 부모 0101-0145 : (1) 당좌자산
+-- 할배 0101-0175 : 1. 유동자산
+-- 증조할배 0101-0250 : 자산
+
+-- 4레벨로 설정해야 4단계인 현금같은 계정의 처리가 가능할거 같아 4단계로 쿼리를 바꿔봄
+
+--
+
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 
+        		CASE
+                WHEN (SELECT PARENT_ACCOUNT_INNER_CODE FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = Grandparent_account_code) IS NULL THEN 1
+                ELSE 2
+            END
+    END AS LEV,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+    SUM(CREDITS) AS CREDITS,
+    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+FROM (
+    SELECT
+    		A1.PARENT_ACCOUNT_INNER_CODE AS GREAT_Grandparent_account_code,
+        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+        A3.ACCOUNT_INNER_CODE AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 1
+        AND S.SLIP_STATUS = '승인'
+        AND A1.ACCOUNT_NAME = '손익'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+    
+    
+    
+    
+    
+-- 계정 이름으로 출력, 티어 정리하기 쉽게
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 2
+        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+    END AS LEV,
+    GREAT_Grandparent_account_code,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+    SUM(CREDITS) AS CREDITS,
+    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+FROM (
+    SELECT
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_NAME
+            ELSE (SELECT ACCOUNT_NAME FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = A1.PARENT_ACCOUNT_INNER_CODE) 
+        END AS GREAT_Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+            ELSE A1.ACCOUNT_NAME
+        END AS Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_NAME
+            ELSE A2.ACCOUNT_NAME
+        END AS Parent_account_code,
+        A3.ACCOUNT_NAME AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 1
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+
+
+
+-- 위 계정명 다시 코드로 변경
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 2
+        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+    END AS LEV,
+    GREAT_Grandparent_account_code,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+    SUM(CREDITS) AS CREDITS,
+    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+FROM (
+    SELECT
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_INNER_CODE
+            ELSE A1.PARENT_ACCOUNT_INNER_CODE
+        END AS GREAT_Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+            ELSE A1.ACCOUNT_INNER_CODE
+        END AS Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_INNER_CODE
+            ELSE A2.ACCOUNT_INNER_CODE
+        END AS Parent_account_code,
+        A3.ACCOUNT_INNER_CODE AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 1
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+    
+    
+    
+-- 차감 계정은 이미 분개에 반영되어있나봄. 따로 마이너스 처리할필요 없음. 따로 처리하면 오히려 금액 안맞더라
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 2
+        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+    END AS LEV,
+    GREAT_Grandparent_account_code,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(DEBITS) AS DEBITS,
+    SUM(CREDITS) AS CREDITS,
+    SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+FROM (
+    SELECT
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_INNER_CODE
+            ELSE A1.PARENT_ACCOUNT_INNER_CODE
+        END AS GREAT_Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+            ELSE A1.ACCOUNT_INNER_CODE
+        END AS Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_INNER_CODE
+            ELSE A2.ACCOUNT_INNER_CODE
+        END AS Parent_account_code,
+        A3.ACCOUNT_INNER_CODE AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 1
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+    
+    
+    
+
+-- 위 표를 서브쿼리로 해서 프로시져 일부 제작 : 아래 계정구조 수정사항 추가된 버전 ********************************************
+    INSERT INTO T_ST_STATUS_RESULT_TABLE (ACCOUNT_PERIOD_NO, lev, code, acc_name, total)
+    SELECT DISTINCT
+    		1 AS ACCOUNT_PERIOD_NO,
+        lev,
+        code,
+        a1.account_name AS acc_name,
+        total 
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                    WHEN GREAT_Grandparent_account_code IS NOT NULL THEN GREAT_Grandparent_account_code
+                END AS code,
+                GREAT_Grandparent_account_code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+									    CASE
+									        WHEN ACCOUNT_code IS NOT NULL THEN 4
+									        WHEN Parent_account_code IS NOT NULL THEN 3
+									        WHEN Grandparent_account_code IS NOT NULL THEN 2
+									        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+									    END AS LEV,
+									    GREAT_Grandparent_account_code,
+									    Grandparent_account_code,
+									    Parent_account_code,
+									    ACCOUNT_code,
+									    SUM(DEBITS) AS DEBITS,
+									    SUM(CREDITS) AS CREDITS,
+									    SUM(DEBITS) - SUM(CREDITS) AS TOTAL
+									FROM (
+									    SELECT
+									        CASE
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_INNER_CODE
+									            ELSE (SELECT ACCOUNT_INNER_CODE FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = A1.PARENT_ACCOUNT_INNER_CODE) 
+									        END AS GREAT_Grandparent_account_code,
+									        CASE
+									        	  WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN A2.ACCOUNT_INNER_CODE
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+									            ELSE A1.ACCOUNT_INNER_CODE
+									        END AS Grandparent_account_code,
+									        CASE
+									        		WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN NULL
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_INNER_CODE
+									            ELSE A2.ACCOUNT_INNER_CODE
+									        END AS Parent_account_code,
+									        A3.ACCOUNT_INNER_CODE AS account_code,
+									        A3.account_character AS account_character,
+									        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+									        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+									    FROM
+									        ACCOUNT A1
+									        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+									        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+									        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+									        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+									    WHERE
+									        S.ACCOUNT_PERIOD_NO = 1  --p_period_no
+									        AND S.SLIP_STATUS = '승인'
+									        AND A1.ACCOUNT_NAME != '손익'
+									)
+									GROUP BY
+									    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code
+      AND lev != 0;
+      
+      
+-- 계정 구조에 문제 발생, 레벨 3중 로마자 들어가는 애는 레벨2에 배치되도록.
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 2
+        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+    END AS LEV,
+    GREAT_Grandparent_account_code,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(DEBITS) AS DEBITS,
+		SUM(CREDITS) AS CREDITS,
+		SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+FROM (
+    SELECT
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_INNER_CODE
+            ELSE (SELECT ACCOUNT_INNER_CODE FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = A1.PARENT_ACCOUNT_INNER_CODE) 
+        END AS GREAT_Grandparent_account_code,
+        CASE
+        	  WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN A2.ACCOUNT_INNER_CODE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+            ELSE A1.ACCOUNT_INNER_CODE
+        END AS Grandparent_account_code,
+        CASE
+        		WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN NULL
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_INNER_CODE
+            ELSE A2.ACCOUNT_INNER_CODE
+        END AS Parent_account_code,
+        A3.ACCOUNT_INNER_CODE AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE
+        S.ACCOUNT_PERIOD_NO = 1
+        AND S.SLIP_STATUS = '승인'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+    
+    
+    
+-- 자본금 분개기록을 조사. 해봤는데 없음
+-- 아이큐브에서도 전년도 이월이라 나와서 자본금의 출처를 찾을수 없음
+-- 즉, 이 회사는 자본금이 없 ㅋ 음
+SELECT
+    CASE
+        WHEN ACCOUNT_code IS NOT NULL THEN 4
+        WHEN Parent_account_code IS NOT NULL THEN 3
+        WHEN Grandparent_account_code IS NOT NULL THEN 2
+        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+    END AS LEV,
+    GREAT_Grandparent_account_code,
+    Grandparent_account_code,
+    Parent_account_code,
+    ACCOUNT_code,
+    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+    SUM(CREDITS) AS CREDITS,
+    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+FROM (
+    SELECT
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_NAME
+            ELSE (SELECT ACCOUNT_NAME FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = A1.PARENT_ACCOUNT_INNER_CODE) 
+        END AS GREAT_Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+            ELSE A1.ACCOUNT_NAME
+        END AS Grandparent_account_code,
+        CASE
+            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_NAME
+            ELSE A2.ACCOUNT_NAME
+        END AS Parent_account_code,
+        A3.ACCOUNT_NAME AS account_code,
+        A3.account_character AS account_character,
+        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+    FROM
+        ACCOUNT A1
+        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+    WHERE S.SLIP_STATUS = '승인'
+      AND j.account_name like '%자본%'
+)
+GROUP BY
+    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code);
+   
+--로마자 추출 
+SELECT
+    account_name,
+    ASCII(SUBSTR(account_name, 1, 1)) AS unicode_value
+FROM
+    account
+WHERE account_name LIKE '%유동%';
+
+--SQL에서 로마자 쓰는법
+--sql에서는 유니코드를 로마자로 바꿔줄 방법이 없다고함. 그래서 실패 ^0^ 그냥 영어로 I,II서도 원하는대로 들어가는거 같아 패스함.
+SELECT
+    CHR(8544) 
+FROM
+    dual;
+    
+    
+
+-- 필요한 계정 과목을 뽑아보자
+SELECT 
+	 CASE
+	 		WHEN ACCOUNT_NAME LIKE '%.%' THEN 2
+	 		WHEN ACCOUNT_NAME = '자산' THEN 1
+	 		WHEN ACCOUNT_NAME LIKE '%자산%' THEN 3 
+	 	  ELSE 1
+	 END AS LEV,
+	 account_inner_code, account_name, NULL AS total
+  FROM ACCOUNT
+ WHERE (PARENT_ACCOUNT_INNER_CODE = '0101-1000'
+       OR PARENT_ACCOUNT_INNER_CODE IN (SELECT account_inner_code
+																				  FROM ACCOUNT
+																				 WHERE PARENT_ACCOUNT_INNER_CODE = '0101-1000')
+	      OR PARENT_ACCOUNT_INNER_CODE IN (SELECT account_inner_code
+																				   FROM ACCOUNT
+																				  WHERE PARENT_ACCOUNT_INNER_CODE = '0101-0250'))
+   AND PARENT_ACCOUNT_INNER_CODE != '0401-0999'
+   AND ACCOUNT_NAME != '손익'
+	 AND account_name like '%미처분%'
+	 
+--개별 조회
+SELECT *
+  FROM ACCOUNT
+ WHERE account_name like '%미처분%'
+ 
+SELECT *
+  FROM ACCOUNT
+ WHERE account_inner_code = '0351-0380'
+
+-- 0101-0250 : 자산 
+-- 0251-0330 : 부채
+-- 0331-0400 : 자본
+-- 0401-0999 : 손익
+-- 1000-1010 : 특수계정과목
+-- 0101-1000 : 계정
+-- 1~4번은 계정의 자식 / 5,6번이 최상위임
+
+-- 테이블 생성
+CREATE TABLE statment_status_account (
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+-- 데이터 삽입
+INSERT INTO statment_status_account (lev, code, acc_name, total)
+SELECT 
+	 CASE
+	 		WHEN ACCOUNT_NAME = '미처분이익잉여금' THEN 3
+	 		WHEN ACCOUNT_NAME LIKE '%.%' THEN 2
+	 		WHEN ACCOUNT_NAME = '자산' THEN 1
+	 		WHEN ACCOUNT_NAME LIKE '%자산%' THEN 3 
+	 	  ELSE 1
+	 END AS LEV,
+	 account_inner_code, account_name, NULL AS total
+  FROM ACCOUNT
+ WHERE (PARENT_ACCOUNT_INNER_CODE = '0101-1000'
+       OR PARENT_ACCOUNT_INNER_CODE IN (SELECT account_inner_code
+																				  FROM ACCOUNT
+																				 WHERE PARENT_ACCOUNT_INNER_CODE = '0101-1000')
+	      OR PARENT_ACCOUNT_INNER_CODE IN (SELECT account_inner_code
+																				   FROM ACCOUNT
+																				  WHERE PARENT_ACCOUNT_INNER_CODE = '0101-0250')
+			 OR account_name like '%미처분%')
+   AND PARENT_ACCOUNT_INNER_CODE != '0401-0999'
+   AND ACCOUNT_NAME != '손익'
+
+
+-- 자산 / 부채 / 자본  삽입
+INSERT INTO statment_status_account (lev, code, acc_name, total)
+SELECT 
+	  0 AS lev, account_inner_code, account_name, NULL AS total
+  FROM ACCOUNT
+ WHERE PARENT_ACCOUNT_INNER_CODE = '0101-1000'
+   AND account_name != '손익'
+  
+-- 데이터 확인
+SELECT * FROM statment_status_account;
+
+--결과 테이블에 요놈도 합치기****************
+INSERT INTO T_ST_STATUS_RESULT_TABLE (ACCOUNT_PERIOD_NO, lev, code, acc_name, total)
+SELECT 
+	  1 AS ACCOUNT_PERIOD_NO,
+    lev,
+    code,
+    acc_name,
+    total
+FROM 
+    statment_status_account ssa
+WHERE 
+    NOT EXISTS (
+        SELECT 1
+        FROM T_ST_STATUS_RESULT_TABLE trt
+        WHERE trt.acc_name = ssa.acc_name
+    );
+    
+-- 데이터 확인 
+SELECT * FROM T_ST_STATUS_RESULT_TABLE;
+DELETE FROM T_ST_STATUS_RESULT_TABLE;
+DELETE FROM statment_status_account;
+
+DROP TABLE T_ST_STATUS_RESULT_TABLE;
+
+-- 다른 테이블로 쓰자
+CREATE TABLE T_ST_STATUS_RESULT_TABLE (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+--다 만든 프로시져 결과 확인
+SELECT
+    account_period_no,
+    lev,
+    code,
+    acc_name,
+    lev3CurrentTotal,
+    OtherLevCurrentTotal,
+    lev3PreTotal,
+    OtherLevPreTotal
+FROM T_COMBINED_FINAL_RESULT
+ORDER BY
+    -- Grouping by '자산', '부채', '자본' based on code ranges
+    CASE
+        WHEN SUBSTR(code, 1, 4) BETWEEN '0101' AND '0250' THEN 1  -- 자산
+        WHEN SUBSTR(code, 1, 4) BETWEEN '0251' AND '0330' THEN 2  -- 부채
+        WHEN SUBSTR(code, 1, 4) BETWEEN '0331' AND '0401' THEN 3  -- 자본
+        ELSE 4  -- 기타
+    END,
+    -- Within each group, lev 0 goes to the top and lev 1 goes to the bottom
+    CASE
+        WHEN lev = 0 THEN 0
+        WHEN lev = 1 THEN 2
+        ELSE 1
+    END,
+    -- Order within '자본' group
+    CASE
+        WHEN SUBSTR(code, 1, 4) = '0331' THEN 1 -- 자본금
+        WHEN SUBSTR(code, 1, 4) = '0341' THEN 2 -- 자본잉여금
+        WHEN SUBSTR(code, 1, 4) = '0381' THEN 3 -- 자본조정
+        WHEN SUBSTR(code, 1, 4) = '0392' THEN 4 -- 기타포괄손익
+        WHEN SUBSTR(code, 1, 4) = '0351' THEN 5 -- 이익잉여금
+        WHEN SUBSTR(code, 1, 4) = '0377' THEN 6 -- 미처분이익잉여금
+    END,
+    -- Additional ordering criteria within groups
+    SUBSTR(code, 1, 4),
+    CASE
+        WHEN lev = 2 THEN SUBSTR(code, 6)
+        ELSE NULL
+    END DESC NULLS LAST,
+    CASE
+        WHEN lev != 2 THEN lev
+        ELSE NULL
+    END;
+
+
+
+
+
+*****************************************손익계산서***********************************************
+-- 최상위 부모 계정들 조사
+SELECT *
+	FROM account
+ WHERE PARENT_ACCOUNT_INNER_CODE IS NULL
+    OR PARENT_ACCOUNT_INNER_CODE = '0101-1000';
+-- 0101-0250 : 자산 
+-- 0251-0330 : 부채
+-- 0331-0400 : 자본
+-- 0401-0999 : 손익
+-- 1000-1010 : 특수계정과목
+-- 0101-1000 : 계정
+-- 1~4번은 계정의 자식 / 5,6번이 최상위임
+
+-- 그룹코드가 존재하는지 조사
+SELECT *
+	FROM account
+ WHERE group_code LIKE '%판매%';
+ 
+ -- 특정코드의 계정명 조사
+SELECT *
+	FROM account
+ WHERE account_inner_code = '0401-0999';
+ 
+  -- 특정코드의 계정명 조사
+SELECT *
+	FROM account
+ WHERE parent_account_inner_code = '0351-0380';
+
+-- 계정명에 특정 계정이 존재하는지 테스트 
+SELECT *
+	FROM account
+ WHERE account_name LIKE '운송원가';
+ 
+-- 영업외% : 영업외수익, 영업외비용
+-- 법인% : 법인세등/ 법인(소득)세등
+-- 손익의 부모 : 0101-1000 (계정 : 계정이름이 계정임;;)
+-- 매출원가 코드 : 0451-0470
+
+-- 매출 : 0401-0430
+-- 매출원가 : 0451-0470
+-- 판매비및일반관리비 :0801-0900
+-- 영업외수익 : 0901-0950
+-- 영업외비용 : 0931-0997
+-- 법인(소득)세등 : 0998-0999
+
+-- 매출 계정과목 조사
+SELECT *
+	FROM account
+ WHERE group_code LIKE '%매출'
+   AND account_name != '사용자설정계정과목';
+-- 403,406 다 매출할인인데 406은 account_character가 null임. 잘못 설계된 계정명이거나 차감에서 반영안하고 바로 반영하려는 의도로 설계된 코드일지도..?
+
+-- 그룹코드가 존재하는지 조사
+SELECT *
+	FROM account
+ WHERE account_character LIKE '%차감%';
+
+
+
+
+--가변이 되야 하는 값을 다 적어봄
+SELECT 
+    { Parent_account_name, account_name } 
+    SUM(DEBITS) AS Total_Debits,
+    SUM(CREDITS) AS Total_Credits
+FROM
+    (
+        SELECT
+            A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+            A1.ACCOUNT_NAME AS Grandparent_account_name,
+            A2.ACCOUNT_NAME AS Parent_account_name,
+            A3.ACCOUNT_NAME AS ACCOUNT_namE,
+            A3.group_code AS group_namE,
+            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+        FROM
+            ACCOUNT A1
+            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+        WHERE
+            S.ACCOUNT_PERIOD_NO = { 전기수, 현기수 }
+            AND S.SLIP_STATUS = '승인'
+    )
+WHERE { Parent_account_name, account_name }  LIKE { '원하는과목' }
+GROUP BY { Parent_account_name, account_name } ;
+
+--2티어 합계 : 과목 바꿔적어야됨
+SELECT 
+    Parent_account_name,
+    SUM(DEBITS) AS Total_Debits,
+    SUM(CREDITS) AS Total_Credits
+FROM
+    (
+        SELECT
+            A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+            A1.ACCOUNT_NAME AS Grandparent_account_name,
+            A2.ACCOUNT_NAME AS Parent_account_name,
+            A3.ACCOUNT_NAME AS ACCOUNT_namE,
+            A3.group_code AS group_namE,
+            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+        FROM
+            ACCOUNT A1
+            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+        WHERE
+            S.ACCOUNT_PERIOD_NO = 3
+            AND S.SLIP_STATUS = '승인'
+            AND a3.account_name = '당기순이익'
+    )
+WHERE Parent_account_name LIKE '%이익잉여금'
+GROUP BY Parent_account_name;
+
+
+
+--3티어 합계 
+SELECT 
+    account_name,
+    SUM(DEBITS) AS Total_Debits,
+    SUM(CREDITS) AS Total_Credits
+FROM
+    (
+        SELECT
+            A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+            A1.ACCOUNT_NAME AS Grandparent_account_name,
+            A2.ACCOUNT_NAME AS Parent_account_name,
+            A3.ACCOUNT_NAME AS ACCOUNT_namE,
+            A3.group_code AS group_namE,
+            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+        FROM
+            ACCOUNT A1
+            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+        WHERE
+            S.ACCOUNT_PERIOD_NO = 1
+            AND S.SLIP_STATUS = '승인'
+    )
+WHERE Parent_account_name LIKE '매출'
+GROUP BY account_name;
+
+
+
+
+
+--해당 기간 분개에 원하는 계정과목 있나 알아보는 코드
+SELECT
+    J.ACCOUNT_INNER_CODE AS ACCOUNT_CODE
+FROM
+    JOURNAL J
+    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+WHERE
+    S.ACCOUNT_PERIOD_NO = 3
+    AND S.SLIP_STATUS = '승인'
+    AND j.ACCOUNT_namE = '이자수익'
+GROUP BY J.ACCOUNT_INNER_CODE
+ORDER BY ACCOUNT_CODE;    
+
+
+
+-- 매출액 - 매출원가 +-어쩌고저쩌고
+SELECT 
+    sales.Total_Debits AS Sales_Debits,
+    sales.Total_Credits AS Sales_Credits,
+    cogs.Total_Debits AS COGS_Debits,
+    cogs.Total_Credits AS COGS_Credits,
+    (sales.Total_Credits - cogs.Total_Debits) AS Gross_Profit,
+    sgna.Total_Debits AS SGNA_Debits,
+    sgna.Total_Credits AS SGNA_Credits,
+    ((sales.Total_Credits - cogs.Total_Debits) - sgna.Total_Debits) AS Operating_Income,
+    other_expenses.Total_Debits AS Other_Expenses_Debits,
+    other_expenses.Total_Credits AS Other_Expenses_Credits,
+    other_revenues.Total_Debits AS Other_Revenues_Debits,
+    other_revenues.Total_Credits AS Other_Revenues_Credits,
+    ((sales.Total_Credits - cogs.Total_Debits) - sgna.Total_Debits) + (other_revenues.Total_Credits - other_expenses.Total_Debits) AS Net_Income
+FROM
+    (SELECT 
+        NVL(SUM(DEBITS), 0) AS Total_Debits,
+        NVL(SUM(CREDITS), 0) AS Total_Credits
+    FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                A1.ACCOUNT_NAME AS Grandparent_account_name,
+                A2.ACCOUNT_NAME AS Parent_account_name,
+                A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                A3.group_code AS group_namE,
+                J.LEFT_DEBTOR_PRICE AS DEBITS,
+                J.RIGHT_CREDITS_PRICE AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+        )
+    WHERE Parent_account_name = '매출') sales,
+    (SELECT 
+        NVL(SUM(DEBITS), 0) AS Total_Debits,
+        NVL(SUM(CREDITS), 0) AS Total_Credits
+    FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                A1.ACCOUNT_NAME AS Grandparent_account_name,
+                A2.ACCOUNT_NAME AS Parent_account_name,
+                A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                A3.group_code AS group_namE,
+                J.LEFT_DEBTOR_PRICE AS DEBITS,
+                J.RIGHT_CREDITS_PRICE AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+        )
+    WHERE Parent_account_name = '매출원가') cogs,
+    (SELECT 
+        NVL(SUM(DEBITS), 0) AS Total_Debits,
+        NVL(SUM(CREDITS), 0) AS Total_Credits
+    FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                A1.ACCOUNT_NAME AS Grandparent_account_name,
+                A2.ACCOUNT_NAME AS Parent_account_name,
+                A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                A3.group_code AS group_namE,
+                J.LEFT_DEBTOR_PRICE AS DEBITS,
+                J.RIGHT_CREDITS_PRICE AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+        )
+    WHERE Parent_account_name = '판매비및일반관리비') sgna,
+    (SELECT 
+        NVL(SUM(DEBITS), 0) AS Total_Debits,
+        NVL(SUM(CREDITS), 0) AS Total_Credits
+    FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                A1.ACCOUNT_NAME AS Grandparent_account_name,
+                A2.ACCOUNT_NAME AS Parent_account_name,
+                A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                A3.group_code AS group_namE,
+                J.LEFT_DEBTOR_PRICE AS DEBITS,
+                J.RIGHT_CREDITS_PRICE AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+        )
+    WHERE Parent_account_name = '영업외비용') other_expenses,
+    (SELECT 
+        NVL(SUM(DEBITS), 0) AS Total_Debits,
+        NVL(SUM(CREDITS), 0) AS Total_Credits
+    FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                A1.ACCOUNT_NAME AS Grandparent_account_name,
+                A2.ACCOUNT_NAME AS Parent_account_name,
+                A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                A3.group_code AS group_namE,
+                J.LEFT_DEBTOR_PRICE AS DEBITS,
+                J.RIGHT_CREDITS_PRICE AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 3
+                AND S.SLIP_STATUS = '승인'
+                AND a3.account_name like '%이익잉여금'
+        )
+    WHERE Parent_account_name = '영업외수익') other_revenues;
+    
+    
+    
+--gpt로 만든 프로시져
+CREATE OR REPLACE PROCEDURE CalculateNetIncome (
+    p_sales_account_name VARCHAR2,
+    p_cogs_account_name VARCHAR2,
+    p_sgna_account_name VARCHAR2,
+    p_other_revenues_account_name VARCHAR2,
+    p_other_expenses_account_name VARCHAR2
+) AS
+    sales_total_debits NUMBER;
+    sales_total_credits NUMBER;
+    cogs_total_debits NUMBER;
+    cogs_total_credits NUMBER;
+    sgna_total_debits NUMBER;
+    sgna_total_credits NUMBER;
+    other_revenues_total_debits NUMBER;
+    other_revenues_total_credits NUMBER;
+    other_expenses_total_debits NUMBER;
+    other_expenses_total_credits NUMBER;
+    net_income NUMBER;
+
+    CURSOR account_cursor (p_account_name VARCHAR2) IS
+        SELECT 
+            NVL(SUM(NVL(J.LEFT_DEBTOR_PRICE, 0)), 0) AS Total_Debits,
+            NVL(SUM(NVL(J.RIGHT_CREDITS_PRICE, 0)), 0) AS Total_Credits
+        FROM
+            ACCOUNT A1
+            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+        WHERE
+            S.ACCOUNT_PERIOD_NO = 3
+            AND S.SLIP_STATUS = '승인'
+            AND A1.PARENT_ACCOUNT_NAME = p_account_name;
+
+BEGIN
+    -- 매출 계정 데이터를 가져옵니다.
+    OPEN account_cursor(p_sales_account_name);
+    FETCH account_cursor INTO sales_total_debits, sales_total_credits;
+    CLOSE account_cursor;
+
+    -- 매출원가 계정 데이터를 가져옵니다.
+    OPEN account_cursor(p_cogs_account_name);
+    FETCH account_cursor INTO cogs_total_debits, cogs_total_credits;
+    CLOSE account_cursor;
+
+    -- 판매관리비 계정 데이터를 가져옵니다.
+    OPEN account_cursor(p_sgna_account_name);
+    FETCH account_cursor INTO sgna_total_debits, sgna_total_credits;
+    CLOSE account_cursor;
+
+    -- 영업외수익 계정 데이터를 가져옵니다.
+    OPEN account_cursor(p_other_revenues_account_name);
+    FETCH account_cursor INTO other_revenues_total_debits, other_revenues_total_credits;
+    CLOSE account_cursor;
+
+    -- 영업외비용 계정 데이터를 가져옵니다.
+    OPEN account_cursor(p_other_expenses_account_name);
+    FETCH account_cursor INTO other_expenses_total_debits, other_expenses_total_credits;
+    CLOSE account_cursor;
+
+    -- 매출에서 매출원가와 판매관리비를 빼고 영업외수익과 영업외비용을 더하여 순이익을 계산합니다.
+    net_income := (sales_total_credits - cogs_total_debits - sgna_total_debits + other_revenues_total_credits - other_expenses_total_debits);
+
+    -- 결과를 출력하거나 다른 작업을 수행합니다.
+    DBMS_OUTPUT.PUT_LINE('Net Income: ' || net_income);
+
+END CalculateNetIncome;
+/
+
+
+-- 동적 쿼리 생성 프로시져
+CREATE OR REPLACE PROCEDURE GetAccountSummary (
+    p_column_name VARCHAR2  -- 파라미터로 전달할 컬럼 이름
+) AS
+    v_query VARCHAR2(1000);
+    v_account_name VARCHAR2(100);
+    v_total_debits NUMBER;
+    v_total_credits NUMBER;
+    CURSOR c_account_summary IS
+        -- 동적 SQL을 사용하여 쿼리 문자열 생성
+        SELECT 
+            ' || p_column_name || ' AS Account_name,
+            SUM(DEBITS) AS Total_Debits,
+            SUM(CREDITS) AS Total_Credits
+        FROM
+            (
+                SELECT
+                    A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+                    A1.ACCOUNT_NAME AS Grandparent_account_name,
+                    A2.ACCOUNT_NAME AS Parent_account_name,
+                    A3.ACCOUNT_NAME AS ACCOUNT_namE,
+                    A3.group_code AS group_namE,
+                    NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                    NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                FROM
+                    ACCOUNT A1
+                    LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                    LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                    LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                WHERE
+                    S.ACCOUNT_PERIOD_NO = 1
+                    AND S.SLIP_STATUS = ''승인''
+            )
+        WHERE 
+            ' || p_column_name || ' LIKE ''매출''
+        GROUP BY 
+            ' || p_column_name || ';
+BEGIN
+    -- 동적 쿼리 실행
+    OPEN c_account_summary;
+    LOOP
+        FETCH c_account_summary INTO v_account_name, v_total_debits, v_total_credits;
+        EXIT WHEN c_account_summary%NOTFOUND;
+        
+        -- 결과 출력
+        DBMS_OUTPUT.PUT_LINE('Account Name: ' || v_account_name);
+        DBMS_OUTPUT.PUT_LINE('Total Debits: ' || v_total_debits);
+        DBMS_OUTPUT.PUT_LINE('Total Credits: ' || v_total_credits);
+    END LOOP;
+    CLOSE c_account_summary;
+END GetAccountSummary;
+/
+
+
+--합계잔액시산표
+			SELECT 
+				CASE
+            WHEN ACCOUNT_namE IS NOT NULL THEN 3
+            WHEN Parent_account_name IS NOT NULL THEN 2
+            WHEN Grandparent_account_name IS NOT NULL THEN 1
+         END AS LEV,
+         Grandparent_account_name,
+         Parent_account_name,
+         ACCOUNT_namE,
+         SUM(DEBITS),
+         SUM(CREDITS)
+			from
+			(
+	 			SELECT
+	            A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+	            A1.ACCOUNT_NAME AS Grandparent_account_name,
+	            A2.ACCOUNT_NAME AS Parent_account_name,
+	            A3.ACCOUNT_NAME AS ACCOUNT_namE,
+	            A3.group_code AS group_namE,
+	            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	        FROM
+	            ACCOUNT A1
+	            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	        WHERE
+	            S.ACCOUNT_PERIOD_NO = 1
+	            AND S.SLIP_STATUS = '승인'
+      )
+      GROUP BY
+         ROLLUP( Grandparent_account_name,
+         Parent_account_name,
+         ACCOUNT_namE )
+     
+    
+--합계잔액시산표에서 손익계산서에 해당하는 부분만 뽑아보자
+			SELECT 
+				CASE
+            WHEN ACCOUNT_namE IS NOT NULL THEN 3
+            WHEN Parent_account_name IS NOT NULL THEN 2
+            WHEN Grandparent_account_name IS NOT NULL THEN 1
+         END AS LEV,
+         Grandparent_account_name,
+         Parent_account_name,
+         ACCOUNT_namE,
+         SUM(DEBITS),
+         SUM(CREDITS),
+         SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+			from
+			(
+	 			SELECT
+	            A1.PARENT_ACCOUNT_INNER_CODE AS grandPARENT_CODE,
+	            A1.ACCOUNT_NAME AS Grandparent_account_name,
+	            A2.ACCOUNT_NAME AS Parent_account_name,
+	            A3.ACCOUNT_NAME AS ACCOUNT_namE,
+	            A3.group_code AS group_namE,
+	            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	        FROM
+	            ACCOUNT A1
+	            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	        WHERE
+	            S.ACCOUNT_PERIOD_NO = 1
+	            AND S.SLIP_STATUS = '승인'
+	            AND A1.ACCOUNT_NAME = '손익'
+      )
+      GROUP BY
+         ROLLUP( Grandparent_account_name,
+         Parent_account_name,
+         ACCOUNT_namE )
+
+  		
+
+--합계잔액시산표에서 손익계산서에 해당하는 부분만 뽑은다음 출력부분 조정하기
+SELECT *
+from
+(
+	SELECT
+		   lev, 
+		   code,
+		   CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(20)) AS acc_name,
+		   abs(total)
+	  from
+	  account a1,
+	  (
+		  SELECT
+		  		NVL(lev, 0) AS lev,
+				  CASE
+				    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+				    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+				    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+			    END as code,
+			    Grandparent_account_code,
+			    Parent_account_code,
+			  	ACCOUNT_code,
+			    TOTAL 
+				FROM
+				(
+					SELECT 
+						CASE
+		            WHEN ACCOUNT_code IS NOT NULL THEN 3
+		            WHEN Parent_account_code IS NOT NULL THEN 2
+		            WHEN Grandparent_account_code IS NOT NULL THEN 1
+		         END AS LEV,
+		         Grandparent_account_code,
+		         Parent_account_code,
+		         ACCOUNT_code,
+		         SUM(DEBITS),
+		         SUM(CREDITS),
+		         SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+		--         ,CASE
+		--            WHEN ACCOUNT_name IS NOT NULL
+		--            AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+		--            ELSE 'N'
+		--         END AS CONTRA_ACCOUNT
+		--				 여기도 차감 계정때메 일단 추가해놨는데 현재는 필요없음
+					from
+					(
+			 			SELECT
+			            A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+			            A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+			            A3.ACCOUNT_INNER_CODE AS account_code,
+			            A3.group_code AS group_namE,
+		--	            a3.account_character AS account_character,
+		--							차감 계정 존재 유무를 위해 넣었으나 1~4기수 모두 손익 카테고리에 차감계정 x
+			            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+			            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+			        FROM
+			            ACCOUNT A1
+			            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+			            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+			            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+			            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+			        WHERE
+			            S.ACCOUNT_PERIOD_NO = 1
+			            AND S.SLIP_STATUS = '승인'
+			            AND A1.ACCOUNT_NAME = '손익'
+		      )
+		      GROUP BY
+		         ROLLUP( Grandparent_account_code,
+		         Parent_account_code,
+		         ACCOUNT_code)
+		    )
+			) cal1
+		WHERE a1.account_inner_code(+) = cal1.code
+		  AND lev != 1
+		
+		UNION ALL
+			
+		SELECT 
+		    4 AS lev,
+		    '0460-0998' AS code,
+		    CAST('매출 총이익' AS VARCHAR2(20)) AS acc_name,
+		    (SELECT ABS(SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0)))
+	         FROM
+	         (
+	             SELECT
+	                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	             FROM
+	                 ACCOUNT A1
+	                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	             WHERE
+	                 S.ACCOUNT_PERIOD_NO = 1
+	                 AND S.SLIP_STATUS = '승인'
+	                 AND A1.ACCOUNT_NAME = '손익'
+	                 AND (A2.account_name = '매출' OR A2.account_name = '매출원가')
+	         )) AS total
+	    FROM DUAL
+	    
+	    UNION ALL
+	    
+	    SELECT 
+		    4 AS lev,
+		    '0900-0998' AS code,
+		    CAST('영업이익' AS VARCHAR2(20)) AS acc_name,
+		    (SELECT SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0))
+	         FROM
+	         (
+	             SELECT
+	                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	             FROM
+	                 ACCOUNT A1
+	                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	             WHERE
+	                 S.ACCOUNT_PERIOD_NO = 1
+	                 AND S.SLIP_STATUS = '승인'
+	                 AND A1.ACCOUNT_NAME = '손익'
+	                 AND (A2.account_name = '매출' OR A2.account_name = '매출원가' OR A2.account_name = '판매비및일반관리비')
+	         )) AS total
+	    FROM DUAL
+	    
+	    UNION ALL
+	    
+	    SELECT 
+		    4 AS lev,
+		    '0999-0998' AS code,
+		    CAST('법인세비용 차감전 순이익' AS VARCHAR2(20)) AS acc_name,
+		    (SELECT ABS(SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0)))
+	         FROM
+	         (
+	             SELECT
+	                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	             FROM
+	                 ACCOUNT A1
+	                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	             WHERE
+	                 S.ACCOUNT_PERIOD_NO = 1
+	                 AND S.SLIP_STATUS = '승인'
+	                 AND A1.ACCOUNT_NAME = '손익'
+	         )) AS total
+	    FROM DUAL
+)
+
+ORDER BY
+    SUBSTR(code, 1, 4),
+    CASE 
+        WHEN lev = 2 THEN SUBSTR(code, 6) END DESC NULLS LAST,
+    CASE 
+        WHEN lev != 2 THEN lev END;
+
+
+
+
+
+-------------------------------------------------------
+
+
+    -- 원하는 행이 없는 경우 추가
+CREATE OR REPLACE PROCEDURE AddMissingRows AS
+BEGIN
+    FOR i IN 1..6 LOOP
+        INSERT INTO YourTable (lev, code, acc_name, total)
+        SELECT
+            0 AS lev,
+            'your_code_here' AS code,
+            CASE i
+                WHEN 1 THEN '매출원가'
+                WHEN 2 THEN '비용1'
+                WHEN 3 THEN '비용2'
+                WHEN 4 THEN '비용3'
+                WHEN 5 THEN '기타비용1'
+                WHEN 6 THEN '기타비용2'
+            END AS acc_name,
+            0 AS total
+        FROM
+            dual
+        WHERE
+            NOT EXISTS (
+                SELECT 1
+                FROM
+                    YourTable
+                WHERE
+                    acc_name = CASE i
+                        WHEN 1 THEN '매출원가'
+                        WHEN 2 THEN '비용1'
+                        WHEN 3 THEN '비용2'
+                        WHEN 4 THEN '비용3'
+                        WHEN 5 THEN '기타비용1'
+                        WHEN 6 THEN '기타비용2'
+                    END
+            );
+    END LOOP;
+END AddMissingRows;
+/
+
+
+    -- get_account_data
+CREATE OR REPLACE FUNCTION GET_ACCOUNT_DATA (
+    p_lev IN NUMBER,
+    p_code IN VARCHAR2,
+    p_acc_name IN VARCHAR2,
+    p_condition IN VARCHAR2
+) RETURN SYS_REFCURSOR IS
+    v_result SYS_REFCURSOR;
+BEGIN
+    OPEN v_result FOR
+    SELECT 
+        p_lev AS lev,
+        p_code AS code,
+        p_acc_name AS acc_name,
+        (SELECT ABS(SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0)))
+         FROM (
+             SELECT
+                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+             FROM
+                 ACCOUNT A1
+                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+             WHERE
+                 S.ACCOUNT_PERIOD_NO = 1
+                 AND S.SLIP_STATUS = '승인'
+                 AND A1.ACCOUNT_NAME = '손익'
+                 AND (A2.account_name = p_condition)
+         )) AS total
+    FROM DUAL;
+    RETURN v_result;
+END;
+/
+
+-- 실제 프로시져
+CREATE OR REPLACE PROCEDURE ACC79.P_STATEMENTS_CURSOR (
+    p_period_no IN NUMBER,
+    p_result OUT SYS_REFCURSOR
+) AS
+    v_cursor1 SYS_REFCURSOR;
+    v_cursor2 SYS_REFCURSOR;
+    v_cursor3 SYS_REFCURSOR;
+BEGIN
+    -- 첫 번째 커서
+    v_cursor1 := GET_ACCOUNT_DATA(4, '0460-0998', '매출 총이익', '매출,매출원가');
+    -- 두 번째 커서
+    v_cursor2 := GET_ACCOUNT_DATA(4, '0900-0998', '영업이익', '매출,매출원가,판매비및일반관리비');
+    -- 세 번째 커서
+    v_cursor3 := GET_ACCOUNT_DATA(4, '0999-0998', '법인세비용 차감전 순이익', NULL);
+
+    -- 메인 쿼리 실행 및 결과 결합
+    OPEN p_result FOR
+    SELECT * FROM (
+        SELECT
+            lev, 
+            code,
+            CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(20)) AS acc_name,
+            ABS(total)
+        FROM
+            account a1,
+            (
+                SELECT
+                    NVL(lev, 0) AS lev,
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                        WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                        WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                    END AS code,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    TOTAL 
+                FROM (
+                    SELECT 
+                        CASE
+                            WHEN ACCOUNT_code IS NOT NULL THEN 3
+                            WHEN Parent_account_code IS NOT NULL THEN 2
+                            WHEN Grandparent_account_code IS NOT NULL THEN 1
+                        END AS LEV,
+                        Grandparent_account_code,
+                        Parent_account_code,
+                        ACCOUNT_code,
+                        SUM(DEBITS),
+                        SUM(CREDITS),
+                        SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                    FROM (
+                        SELECT
+                            A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                            A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                            A3.ACCOUNT_INNER_CODE AS account_code,
+                            A3.group_code AS group_name,
+                            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                        FROM
+                            ACCOUNT A1
+                            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                        WHERE
+                            S.ACCOUNT_PERIOD_NO = p_period_no
+                            AND S.SLIP_STATUS = '승인'
+                            AND A1.ACCOUNT_NAME = '손익'
+                    )
+                    GROUP BY
+                        ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+                )
+            ) cal1
+        WHERE a1.account_inner_code(+) = cal1.code
+          AND lev != 1
+        UNION ALL
+        SELECT * FROM TABLE(v_cursor1)
+        UNION ALL
+        SELECT * FROM TABLE(v_cursor2)
+        UNION ALL
+        SELECT * FROM TABLE(v_cursor3)
+    )
+    ORDER BY
+        SUBSTR(code, 1, 4),
+        CASE 
+            WHEN lev = 2 THEN SUBSTR(code, 6) END DESC NULLS LAST,
+        CASE 
+            WHEN lev != 2 THEN lev END;
+END;
+/
+
+
+--호출및 관리
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_result SYS_REFCURSOR;
+    v_lev NUMBER;
+    v_code VARCHAR2(20);
+    v_acc_name VARCHAR2(20);
+    v_total NUMBER;
+BEGIN
+    -- 프로시저 호출
+    ACC79.P_STATEMENTS_CURSOR(1, v_result);
+
+    -- 결과를 반복하여 출력
+    LOOP
+        FETCH v_result INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_result%NOTFOUND;
+
+        -- 결과 출력
+        DBMS_OUTPUT.PUT_LINE('LEV: ' || v_lev || ', CODE: ' || v_code || ', ACCOUNT NAME: ' || v_acc_name || ', TOTAL: ' || v_total);
+    END LOOP;
+
+    CLOSE v_result;
+END;
+/
+
+---------------------------------------------------------------------
+
+
+--합계잔액시산표에서 손익계산서에 해당하는 부분만 뽑은다음 출력부분 조정하기
+SELECT *
+from
+(
+	SELECT
+		   lev, 
+		   code,
+		   CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(20)) AS acc_name,
+		   abs(total)
+	  from
+	  account a1,
+	  (
+		  SELECT
+		  		NVL(lev, 0) AS lev,
+				  CASE
+				    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+				    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+				    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+			    END as code,
+			    Grandparent_account_code,
+			    Parent_account_code,
+			  	ACCOUNT_code,
+			    TOTAL 
+				FROM
+				(
+					SELECT 
+						CASE
+		            WHEN ACCOUNT_code IS NOT NULL THEN 3
+		            WHEN Parent_account_code IS NOT NULL THEN 2
+		            WHEN Grandparent_account_code IS NOT NULL THEN 1
+		         END AS LEV,
+		         Grandparent_account_code,
+		         Parent_account_code,
+		         ACCOUNT_code,
+		         SUM(DEBITS),
+		         SUM(CREDITS),
+		         SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+		--         ,CASE
+		--            WHEN ACCOUNT_name IS NOT NULL
+		--            AND MAX(ACCOUNT_CHARACTER) LIKE '%차감%' THEN 'Y'
+		--            ELSE 'N'
+		--         END AS CONTRA_ACCOUNT
+		--				 여기도 차감 계정때메 일단 추가해놨는데 현재는 필요없음
+					from
+					(
+			 			SELECT
+			            A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+			            A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+			            A3.ACCOUNT_INNER_CODE AS account_code,
+			            A3.group_code AS group_namE,
+		--	            a3.account_character AS account_character,
+		--							차감 계정 존재 유무를 위해 넣었으나 1~4기수 모두 손익 카테고리에 차감계정 x
+			            NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+			            NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+			        FROM
+			            ACCOUNT A1
+			            LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+			            LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+			            LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+			            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+			        WHERE
+			            S.ACCOUNT_PERIOD_NO = 1
+			            AND S.SLIP_STATUS = '승인'
+			            AND A1.ACCOUNT_NAME = '손익'
+		      )
+		      GROUP BY
+		         ROLLUP( Grandparent_account_code,
+		         Parent_account_code,
+		         ACCOUNT_code)
+		    )
+			) cal1
+		WHERE a1.account_inner_code(+) = cal1.code
+		  AND lev != 1
+		
+		UNION ALL
+			
+		SELECT 
+		    4 AS lev,
+		    '0460-0998' AS code,
+		    CAST('매출 총이익' AS VARCHAR2(20)) AS acc_name,
+		    (SELECT ABS(SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0)))
+	         FROM
+	         (
+	             SELECT
+	                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+	                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+	             FROM
+	                 ACCOUNT A1
+	                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+	                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+	                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+	                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+	             WHERE
+	                 S.ACCOUNT_PERIOD_NO = 1
+	                 AND S.SLIP_STATUS = '승인'
+	                 AND A1.ACCOUNT_NAME = '손익'
+	                 AND (A2.account_name = '매출' OR A2.account_name = '매출원가')
+	         )) AS total
+	    FROM DUAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--gpt병신색기 밥값못하누
+SELECT
+    lev, 
+    code,
+    acc_name,
+    total
+FROM
+(
+    SELECT
+        CASE
+            WHEN ACCOUNT_code IS NOT NULL THEN 3
+            WHEN Parent_account_code IS NOT NULL THEN 2
+            WHEN Grandparent_account_code IS NOT NULL THEN 1
+        END AS lev,
+        CASE
+            WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+            WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+            WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+        END as code,
+        NVL(a1.account_name, '당기순이익') AS acc_name,
+        total 
+    FROM
+    (
+        SELECT
+            CASE
+                WHEN ACCOUNT_code IS NOT NULL THEN 3
+                WHEN Parent_account_code IS NOT NULL THEN 2
+                WHEN Grandparent_account_code IS NOT NULL THEN 1
+            END AS LEV,
+            Grandparent_account_code,
+            Parent_account_code,
+            ACCOUNT_code,
+            SUM(DEBITS),
+            SUM(CREDITS),
+            SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+        FROM
+        (
+            SELECT
+                A1.PARENT_ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                A2.PARENT_ACCOUNT_INNER_CODE AS Parent_account_code,
+                A3.ACCOUNT_INNER_CODE AS ACCOUNT_code,
+                A3.group_code AS group_namE,
+                NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+            FROM
+                ACCOUNT A1
+                LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            WHERE
+                S.ACCOUNT_PERIOD_NO = 1
+                AND S.SLIP_STATUS = '승인'
+                AND A1.ACCOUNT_NAME = '손익'
+        )
+        GROUP BY
+            ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+    ) cal1
+    LEFT JOIN account a1 ON a1.account_inner_code = cal1.code
+    WHERE lev != 1
+    
+    UNION ALL
+    
+    SELECT 
+        2 AS lev,
+        '0401-0998' AS code,
+        '매출 총이익' AS acc_name,
+        (
+            SELECT SUM(NVL(DEBITS, 0)) - SUM(NVL(CREDITS, 0))
+            FROM
+            (
+                SELECT
+                    NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                    NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                FROM
+                    ACCOUNT A1
+                    LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                    LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                    LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                WHERE
+                    S.ACCOUNT_PERIOD_NO = 4
+                    AND S.SLIP_STATUS = '승인'
+                    AND A1.ACCOUNT_NAME = '손익'
+                    AND (A2.account_name = '매출' 
+                    			OR A2.account_name = '제조원가' 
+                    			OR A2.account_name = '판매비및일반관리비'
+                    			OR A2.account_name = '영업외수익'
+                    			OR A2.account_name = '영업외비용'
+                    			)
+            )
+        ) AS total
+    FROM DUAL
+)
+ORDER BY
+    lev, 
+    code DESC NULLS LAST;
+
+
+
+
+
+--프로시져 제작 테스트
+		INSERT INTO TEMP_RESULT_TABLE (lev, code, acc_name, total)
+    SELECT
+        lev, 
+        code,
+        CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(20)) AS acc_name,
+        ABS(total)
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                END AS code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL 
+            FROM (
+                SELECT 
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(DEBITS),
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.group_code AS group_name,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 1 --period_no로 나중에 바꿔라
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code
+      AND lev != 1;
+      
+      
+    SELECT p.account_period_no, r.*
+		  FROM period p,
+		       (SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.group_code AS group_name,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 3 --period_no로 나중에 바꿔라
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익') r
+		 WHERE p.account_period_no = 3;
+		 
+		 
+--마이바티스 백단 오류 조회문
+select  segment_name, segment_type
+from     dba_extents
+where  file_id=201
+and     1536 between block_id and block_id + blocks-1
+
+--잘못된 임시테이블을 만들어 쓰다 새로 만들었는데 마이바티스가 그걸 인식 못하는거 같음
+DROP TABLESPACE temp INCLUDING CONTENTS AND DATAFILES;
+-- 삭제 안됨 : ORA-12906: cannot drop default temporary tablespace
+
+-- 임시테이블 수정을 위해 이런 저런 명령어를 실행해봤으나 권한 문제등 여러 오류만 추가 발생
+ALTER SESSION SET TEMP_TABLESPACE = new_temp;
+
+analyze table TEMP_RESULT_TABLE validate structure ;
+
+CREATE TEMPORARY TABLESPACE temp
+   TEMPFILE 'C:\DEV\DB\APP\ORACLE\ORADATA\XE\TEMP01.DBF'
+   SIZE 20M
+   AUTOEXTEND ON;
+
+-- 해서 임시테이블이 아닌 실제 테이블 작성으로 노선 변경. 잘 작동함.
+-- 아래는 sqlplus에서 테스트해보는 실행문.
+
+SET SERVEROUTPUT ON;
+VAR c REFCURSOR;
+EXEC ACC79.P_COMPUTE_INCOME_STATEMENT2(1, 'some_value', :c);
+PRINT c;
+
+
+
+select * from v$database_block_corruption;
+
+
+CREATE TABLE T_RESULT_TABLE (
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_FINAL_RESULT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_TEMP_CURRENT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_TEMP_PREVIOUS (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_COMBINED_FINAL_RESULT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    lev3CurrentTotal NUMBER,
+    OtherLevCurrentTotal NUMBER,
+    lev3PreTotal NUMBER,
+    OtherLevPreTotal NUMBER
+);
+
+
+
+SELECT 4 AS account_period_no, 
+	  	lev,
+	  	code,
+	  	acc_name,
+	  	lev3CurrentTotal,
+	  	OtherLevCurrentTotal,
+	  	lev3PreTotal,
+	  	OtherLevPreTotal
+  from
+	  	(
+		   SELECT
+		        COALESCE(c.account_period_no, p.account_period_no) AS account_period_no,
+		        COALESCE(c.lev, p.lev) AS lev,
+		        COALESCE(c.code, p.code) AS code,
+		        COALESCE(c.acc_name, p.acc_name) AS acc_name,
+		        CASE
+		            WHEN COALESCE(c.lev, p.lev) = c.lev and COALESCE(c.lev, p.lev) = 3
+		            THEN NVL(c.total, 0) ELSE 0
+		        END AS lev3CurrentTotal,
+		        CASE
+		            WHEN COALESCE(c.lev, p.lev) = c.lev and COALESCE(c.lev, p.lev) != 3
+		            THEN NVL(c.total, 0) ELSE 0
+		        END AS OtherLevCurrentTotal,
+		        CASE
+		            WHEN COALESCE(c.lev, p.lev) = p.lev and COALESCE(c.lev, p.lev) = 3
+		            THEN NVL(p.total, 0) ELSE 0
+		        END AS lev3PreTotal,
+		        CASE
+		            WHEN COALESCE(c.lev, p.lev) = p.lev and COALESCE(c.lev, p.lev) != 3
+		            THEN NVL(p.total, 0) ELSE 0
+		        END AS OtherLevPreTotal
+		    FROM
+		        T_TEMP_CURRENT c
+		        FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+    	)
+  GROUP BY code, acc_name
+                
+SELECT * FROM T_TEMP_CURRENT;
+SELECT * FROM T_TEMP_previous;
+
+
+SELECT
+    COALESCE(c.account_period_no, p.account_period_no) AS account_period_no,
+    COALESCE(c.lev, p.lev) AS lev,
+    COALESCE(c.code, p.code) AS code,
+    COALESCE(c.acc_name, p.acc_name) AS acc_name,
+    SUM(CASE
+            WHEN c.lev = 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) AS lev3CurrentTotal,
+    SUM(CASE
+            WHEN c.lev != 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) AS OtherLevCurrentTotal,
+    SUM(CASE
+            WHEN p.lev = 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) AS lev3PreTotal,
+    SUM(CASE
+            WHEN p.lev != 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) AS OtherLevPreTotal
+FROM
+    T_TEMP_CURRENT c
+    FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+GROUP BY
+    COALESCE(c.account_period_no, p.account_period_no),
+    COALESCE(c.lev, p.lev),
+    COALESCE(c.code, p.code),
+    COALESCE(c.acc_name, p.acc_name)
+HAVING
+    SUM(CASE
+            WHEN c.lev = 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) != 0
+    OR SUM(CASE
+            WHEN c.lev != 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) != 0
+    OR SUM(CASE
+            WHEN p.lev = 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) != 0
+    OR SUM(CASE
+            WHEN p.lev != 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) != 0
+ORDER BY
+    COALESCE(c.code, p.code), 
+    COALESCE(c.acc_name, p.acc_name);
+    
+
+--프론트 형식대로 뽑는 테이블  
+SELECT
+    MAX(COALESCE(c.account_period_no, p.account_period_no)) AS account_period_no,
+    COALESCE(c.lev, p.lev) AS lev,
+    COALESCE(c.code, p.code) AS code,
+    COALESCE(c.acc_name, p.acc_name) AS acc_name,
+    SUM(CASE
+            WHEN COALESCE(c.lev, p.lev) = 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) AS lev3CurrentTotal,
+    SUM(CASE
+            WHEN COALESCE(c.lev, p.lev) != 3 THEN NVL(c.total, 0)
+            ELSE 0
+        END) AS OtherLevCurrentTotal,
+    SUM(CASE
+            WHEN COALESCE(p.lev, c.lev) = 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) AS lev3PreTotal,
+    SUM(CASE
+            WHEN COALESCE(p.lev, c.lev) != 3 THEN NVL(p.total, 0)
+            ELSE 0
+        END) AS OtherLevPreTotal
+FROM
+    T_TEMP_CURRENT c
+    FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+GROUP BY
+    COALESCE(c.lev, p.lev),
+    COALESCE(c.code, p.code),
+    COALESCE(c.acc_name, p.acc_name)
+ORDER BY
+    SUBSTR(code, 1, 4),
+    CASE 
+        WHEN lev = 2 THEN SUBSTR(code, 6) END DESC NULLS LAST,
+    CASE 
+        WHEN lev != 2 THEN lev END;
+
+SELECT * FROM T_TEMP_CURRENT;
+SELECT * FROM T_TEMP_previous;
+
+
+
+SELECT *
+FROM
+    T_TEMP_CURRENT c
+    FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name 
+    
+
+    
+
+
+-- 차감계정을 처리해보자?
+                SELECT
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(DEBITS),
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.group_code AS group_name,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = 1
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익'
+                        AND a3.account_character LIKE '%차감'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+                    
+         
+
+
+
+
+
+
+-- get_account_data 음수반영 시도
+SELECT SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0))
+         FROM (           
+
+								SELECT
+	  							  a3.account_name,
+                    NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                    NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                FROM
+                    ACCOUNT A1
+                    LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                    LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                    LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                WHERE
+                    S.ACCOUNT_PERIOD_NO = 4
+                    AND S.SLIP_STATUS = '승인'
+                    AND A1.ACCOUNT_NAME = '손익'   
+                    AND (
+                    			A2.account_name = '매출' 
+                    			OR A2.account_name = '제조원가' 
+                    			OR A2.account_name = '판매비및일반관리비'
+                    			OR A2.account_name = '영업외수익'
+                    			OR A2.account_name = '영업외비용' )
+                    )
+                    			
+                    			
+                    			
+--condition 파라미터 여러가지로 테스트        			
+SELECT ABS(SUM(CASE 
+                            WHEN ACC_char LIKE '%차감%' 
+                            THEN -NVL(CREDITS, 0) 
+                            ELSE NVL(CREDITS, 0) 
+                        END) 
+                 - SUM(CASE 
+                            WHEN ACC_char LIKE '%차감%' 
+                            THEN -NVL(DEBITS, 0) 
+                            ELSE NVL(DEBITS, 0) 
+                        END))
+         FROM (
+             SELECT
+                 A3.account_character AS ACC_char,
+                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+             FROM
+                 ACCOUNT A1
+                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+             WHERE
+                 S.ACCOUNT_PERIOD_NO = 4
+                 AND S.SLIP_STATUS = '승인'
+                 AND A1.ACCOUNT_NAME = '손익'
+                 AND ( 
+--                 					A2.account_name = '매출' 
+--                    			OR A2.account_name = '제조원가' 
+--                    			OR A2.account_name = '판매비및일반관리비'
+--                    			OR A2.account_name = '영업외수익'
+                    			A2.account_name = '영업외비용' 
+											)
+             )
+             
+             
+-- 가격이 13006200인놈 찾기. 문제의 분개임
+-- 운송원가가 문제였음. 제조원가에 속해야 하지만 테이블 구조상 제조원가랑 동급 티어이므로 같이 계산이 안됨. get_account_data를 호출할때 같이 호출하는걸로 해결함.
+
+
+
+*****************************************이익잉여금 처분계산서***********************************************
+-- 계정명에 특정 계정이 존재하는지 테스트 
+SELECT *
+	FROM account
+ WHERE account_name LIKE '중간배당금';
+
+
+-- 미지급배당금 : 
+-- character : 일반 / group_code : 유동부채
+
+-- 중간배당금 : 
+-- character : 미처분이익 / group_code : 5.자본 
+
+
+SELECT 
+    index_code,
+    account_name,
+    name_account,
+    ABS(SUM(CASE
+         WHEN c.account_name IS NOT NULL AND c.name_account IS NOT NULL THEN NVL(c.balance, 0)
+         ELSE 0
+     END)) AS balance1,
+    ABS(SUM(CASE
+			         WHEN c.name_account IS NULL AND c.account_name LIKE '%미처분%' THEN 
+			         			(SELECT SUM(balance) AS total_balance
+											FROM (
+											    SELECT 
+											        NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance    
+											    FROM (
+											        SELECT * FROM ACCOUNT
+											        WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+											        AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+											    ) A
+											    LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+											    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+											    GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+											    UNION ALL
+
+											    SELECT 
+											        total AS balance
+											    FROM (
+											        SELECT * FROM T_TEMP_CURRENT WHERE code IS NULL
+											    ) 
+											) 
+										)
+			         ELSE 0
+			     	END)) AS balance2
+FROM (
+    SELECT 
+        A1.index_code AS index_code,
+        A1.ACCOUNT_NAME AS account_name,
+        A2.name_account AS name_account,
+        NVL(A2.BALANCE, 0) AS balance
+    FROM (
+        SELECT * FROM T_RETAINED_EARNINGS
+    ) A1
+    INNER JOIN (
+        SELECT 
+            result.*,
+            ROW_NUMBER() OVER(ORDER BY lev DESC, parent DESC) AS index_code
+        FROM (
+            -- Existing query
+            SELECT 
+                2 AS lev,
+                A.PARENT_ACCOUNT_INNER_CODE AS parent,
+                CAST(A.account_name AS VARCHAR2(50)) AS name_account,
+                NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance    
+            FROM (
+                SELECT * FROM ACCOUNT
+                WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+                AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+            ) A
+            LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+            UNION ALL
+
+            -- Query to add the current net income row
+            SELECT 
+                B.lev,
+                B.code AS parent,
+                B.acc_name AS name_account,
+                B.total AS balance
+            FROM (
+                SELECT * FROM 
+								T_TEMP_CURRENT
+								WHERE code IS null
+            ) B
+        ) result
+        ORDER BY 
+            lev DESC,
+            parent DESC
+    ) A2 ON A1.index_code = A2.index_code(+) 
+) C
+GROUP BY
+    index_code,
+    account_name,
+    name_account
+ORDER BY 
+    CASE 
+        WHEN account_name = 'I.미처분이익잉여금' THEN 0 
+        ELSE 1 
+    END, 
+    index_code;
+
+
+--당기 순이익 금액이 있는 테이블
+					SELECT 
+                2 AS lev,
+                A.PARENT_ACCOUNT_INNER_CODE AS parent,
+                CAST(A.account_name AS VARCHAR2(50)) AS name_account,
+                NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance    
+            FROM (
+                SELECT * FROM ACCOUNT
+                WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+                AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+            ) A
+            LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+            UNION ALL
+
+            -- Query to add the current net income row
+            SELECT 
+                B.lev,
+                B.code AS parent,
+                B.acc_name AS name_account,
+                B.total AS balance
+            FROM (
+                SELECT * FROM 
+								T_TEMP_CURRENT
+								WHERE code IS null
+            ) b;
+
+
+
+
+
+SELECT 
+        A1.index_code AS index_code,
+        A1.ACCOUNT_NAME AS account_name,
+        A2.name_account AS name_account,
+        NVL(A2.BALANCE, 0) AS balance
+    FROM (
+        SELECT * FROM T_RETAINED_EARNINGS
+    ) A1
+    INNER JOIN (
+        SELECT 
+            result.*,
+            ROW_NUMBER() OVER(ORDER BY lev DESC, parent DESC) AS index_code
+        FROM (
+            -- Existing query
+            SELECT 
+                2 AS lev,
+                A.PARENT_ACCOUNT_INNER_CODE AS parent,
+                A.account_name AS name_account,
+                NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance    
+            FROM (
+                SELECT * FROM ACCOUNT
+                WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+                AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+            ) A
+            LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+            UNION ALL
+
+            -- Query to add the current net income row
+            SELECT 
+                B.lev,
+                B.parent,
+                B.name_account,
+                B.balance
+            FROM (
+                SELECT
+                    lev,
+                    code AS parent,
+                    NVL(a1.account_name, '당기순이익') AS name_account,
+                    ABS(total) AS balance
+                FROM
+                    account a1
+                    RIGHT JOIN (
+                        SELECT
+                            NVL(lev, 0) AS lev,
+                            CASE
+                                WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                                WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                                WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                            END AS code,
+                            Grandparent_account_code,
+                            Parent_account_code,
+                            ACCOUNT_code,
+                            TOTAL
+                        FROM (
+                            SELECT
+                                CASE
+                                    WHEN ACCOUNT_code IS NOT NULL THEN 3
+                                    WHEN Parent_account_code IS NOT NULL THEN 2
+                                    WHEN Grandparent_account_code IS NOT NULL THEN 1
+                                END AS LEV,
+                                Grandparent_account_code,
+                                Parent_account_code,
+                                ACCOUNT_code,
+                                SUM(DEBITS) AS sum_debits,
+                                SUM(CREDITS) AS sum_credits,
+                                SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                            FROM (
+                                SELECT
+                                    A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                                    A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                                    A3.ACCOUNT_INNER_CODE AS account_code,
+                                    A3.group_code AS group_name,
+                                    NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                                    NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                                FROM
+                                    ACCOUNT A1
+                                    LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                                    LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                                    LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                                    LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                                WHERE
+                                    S.ACCOUNT_PERIOD_NO = 4
+                                    AND S.SLIP_STATUS = '승인'
+                                    AND A1.ACCOUNT_NAME = '손익'
+                            )
+                            GROUP BY
+                                ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+                        )
+                    ) c1 ON a1.account_inner_code = c1.code
+                WHERE lev != 1
+            ) B
+            WHERE parent IS NULL
+        ) result
+        ORDER BY 
+            lev DESC,
+            parent DESC
+    ) A2 ON A1.index_code = A2.index_code(+) ;
+
+
+
+CREATE TABLE T_RETAINED_EARNINGS (
+    INDEX_CODE NUMBER,
+    ACCOUNT_NAME VARCHAR2(50)
+);
+
+INSERT INTO T_RETAINED_EARNINGS (INDEX_CODE, ACCOUNT_NAME) 
+VALUES
+--(NULL, 'I.미처분이익잉여금'),
+--(1, '1.전기이월미처분잉여금'),
+--(2, '2.회계변경의 누적효과'),
+--(3, '3.전기오류수정이익'),
+--(4, '4.전기오류수정손실'),
+--(5, '5.중간배당액'),
+--(6, '6.당기순이익'),
+--(NULL, 'II.임의적립금등의 이입액'),
+(NULL, '합 계');
+
+
+SELECT * FROM 
+T_TEMP_CURRENT
+WHERE code IS null
+
+
+
+
+
+
+
+
+
+여기부터 하면됨!!!!!!!!!!!!!!
+*****************************************get_account_data***********************************************
+CREATE OR REPLACE FUNCTION ACC79.GET_ACCOUNT_DATA (
+		p_period_no IN NUMBER,
+    p_lev IN NUMBER,
+    p_code IN VARCHAR2,
+    p_acc_name IN VARCHAR2,
+    p_conditions IN VARCHAR2
+) RETURN SYS_REFCURSOR IS
+    v_result SYS_REFCURSOR;
+BEGIN
+    OPEN v_result FOR
+    SELECT
+        p_lev AS lev,
+        p_code AS code,
+        p_acc_name AS acc_name,
+        (SELECT SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0))
+         FROM (
+             SELECT
+                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+             FROM
+                 ACCOUNT A1
+                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+             WHERE
+                 S.ACCOUNT_PERIOD_NO = p_period_no
+                 AND S.SLIP_STATUS = '승인'
+                 AND A1.ACCOUNT_NAME = '손익'
+                 AND INSTR(p_conditions, A2.ACCOUNT_NAME) > 0
+         )) AS total
+    FROM DUAL;
+    RETURN v_result;
+END;
+
+
+*****************************************p_income_statement_combined***********************************************
+CREATE OR REPLACE PROCEDURE ACC79.P_INCOME_STATEMENT_COMBINED (
+    p_period_no IN NUMBER,
+    p_prev_period_no IN NUMBER,
+    p_result OUT SYS_REFCURSOR
+) is
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_TEMP_CURRENT;
+    DELETE FROM T_TEMP_PREVIOUS;
+    DELETE FROM T_COMBINED_FINAL_RESULT;
+
+    -- 현재 기간 데이터 삽입
+    ACC79.P_COMPUTE_INCOME_STATEMENT2(p_period_no);
+    INSERT INTO T_TEMP_CURRENT (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_FINAL_RESULT;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 이전 기간 데이터 삽입
+    ACC79.P_COMPUTE_INCOME_STATEMENT2(p_prev_period_no);
+    INSERT INTO T_TEMP_PREVIOUS (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_FINAL_RESULT;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 현재 기간과 이전 기간 데이터를 조인하여 최종 테이블에 삽입
+    INSERT INTO T_COMBINED_FINAL_RESULT (
+        ACCOUNT_PERIOD_NO,
+        lev,
+        code,
+        acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+    )
+		SELECT
+		    MAX(COALESCE(c.account_period_no, p.account_period_no)) AS account_period_no,
+		    COALESCE(c.lev, p.lev) AS lev,
+		    COALESCE(c.code, p.code) AS code,
+		    COALESCE(c.acc_name, p.acc_name) AS acc_name,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) = 3 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS lev3CurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) != 3 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS OtherLevCurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) = 3 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS lev3PreTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) != 3 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS OtherLevPreTotal
+		FROM
+		    T_TEMP_CURRENT c
+		    FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+		GROUP BY
+		    COALESCE(c.lev, p.lev),
+		    COALESCE(c.code, p.code),
+		    COALESCE(c.acc_name, p.acc_name);
+
+    -- 최종 결과 반환
+    OPEN p_result FOR
+    SELECT
+    		account_period_no,
+    		lev,
+    		code,
+     		CASE
+		    	WHEN acc_name = '매출' THEN '(1) 매출'
+		      WHEN acc_name = '제조원가' THEN '(2) 제조원가'
+		      WHEN acc_name = '매출 총이익' THEN '1. 매출 총이익'
+		      WHEN acc_name = '판매비및일반관리비' THEN '(1) 판매비및일반관리비'
+		      WHEN acc_name = '영업이익' THEN '2. 영업이익'
+		      WHEN acc_name = '영업외수익' THEN '(1) 영업외수익'
+		      WHEN acc_name = '영업외비용' THEN '(2) 영업외비용'
+		      WHEN acc_name = '법인세비용 차감전 순이익' THEN '3. 법인세비용 차감전 순이익'
+		      WHEN acc_name = '법인(소득)세등' THEN '(1) 법인(소득)세등'
+		      WHEN acc_name = '운송원가' THEN '(2-1) 운송원가'
+		      ELSE acc_name
+        END AS acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+       FROM T_COMBINED_FINAL_RESULT
+    ORDER BY
+        SUBSTR(code, 1, 4),
+        CASE
+            WHEN lev = 2 THEN SUBSTR(code, 6) END DESC NULLS LAST,
+        CASE
+            WHEN lev != 2 THEN lev END;
+END;
+
+*****************************************p_compute_income_statement2***********************************************
+CREATE OR REPLACE PROCEDURE ACC79.P_COMPUTE_INCOME_STATEMENT2 (
+    p_period_no IN NUMBER
+) AS
+    v_cursor1 SYS_REFCURSOR;
+    v_cursor2 SYS_REFCURSOR;
+    v_cursor3 SYS_REFCURSOR;
+    v_lev NUMBER;
+    v_code VARCHAR2(20);
+    v_acc_name VARCHAR2(50);
+    v_total NUMBER;
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_RESULT_TABLE;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 쿼리 결과를 임시 테이블에 삽입
+    INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total)
+    SELECT
+        lev,
+        code,
+        CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(50)) AS acc_name,
+        total 
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                END AS code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS DEBITS,
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(CASE WHEN account_character LIKE '%차감%' THEN -DEBITS ELSE DEBITS END) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.account_character AS account_character,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = p_period_no
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code
+      AND lev != 1;
+
+		BEGIN
+		    -- 추가 행 삽입
+		    FOR i IN 1..6 LOOP
+		        -- 조건에 따른 코드와 계정명 설정
+		        CASE i
+		            WHEN 1 THEN
+		                v_code := '0401-0430';
+		                v_acc_name := '매출';
+		            WHEN 2 THEN
+		                v_code := '0501-0600';
+		                v_acc_name := '제조원가';
+		            WHEN 3 THEN
+		                v_code := '0801-0900';
+		                v_acc_name := '판매비및일반관리비';
+		            WHEN 4 THEN
+		                v_code := '0901-0950';
+		                v_acc_name := '영업외수익';
+		            WHEN 5 THEN
+		                v_code := '0931-0997';
+		                v_acc_name := '영업외비용';
+		            WHEN 6 THEN
+		                v_code := '0998-0999';
+		                v_acc_name := '법인(소득)세등';
+		        END CASE;
+
+		        -- BEGIN...END 블록으로 감싸기
+		        BEGIN
+		            -- 임시 테이블에 추가 행 삽입
+		            INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total)
+		            SELECT
+		                2 AS lev,
+		                v_code AS code,
+		                v_acc_name AS acc_name,
+		                0 AS total
+		            FROM
+		                dual
+		            WHERE
+		                NOT EXISTS (
+		                    SELECT 1
+		                    FROM
+		                        T_RESULT_TABLE
+		                    WHERE
+		                        acc_name = v_acc_name
+		                );
+		        END;
+		    END LOOP;
+		END;
+
+    -- 커서 실행 및 임시 테이블에 데이터 삽입
+    v_cursor1 := GET_ACCOUNT_DATA(p_period_no, 4, '0799-0999', '매출 총이익', '매출,제조원가,운송원가');
+    v_cursor2 := GET_ACCOUNT_DATA(p_period_no, 4, '0900-0998', '영업이익', '매출,제조원가,운송원가,판매비및일반관리비');
+    v_cursor3 := GET_ACCOUNT_DATA(p_period_no, 4, '0997-0998', '법인세비용 차감전 순이익', '매출,제조원가,운송원가,판매비및일반관리비,영업외수익,영업외비용');
+
+    -- 커서 결과를 임시 테이블에 삽입
+    LOOP
+        FETCH v_cursor1 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor1%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, v_total);
+    END LOOP;
+    CLOSE v_cursor1;
+
+    LOOP
+        FETCH v_cursor2 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor2%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, v_total);
+    END LOOP;
+    CLOSE v_cursor2;
+
+    LOOP
+        FETCH v_cursor3 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor3%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, NVL(v_total, 0));
+    END LOOP;
+    CLOSE v_cursor3;
+
+		INSERT INTO T_FINAL_RESULT (account_period_no, lev, code, acc_name, total)
+    SELECT p_period_no, lev, code, acc_name, total
+    FROM T_RESULT_TABLE;
+END;
+
+
+
+*****************************************P_COMPUTE_STATEMENT_STATUS***********************************************
+CREATE OR REPLACE PROCEDURE ACC79.P_COMPUTE_STATEMENT_STATUS (
+    p_period_no IN NUMBER
+) IS
+    v_earnings NUMBER;
+    v_total_capital NUMBER;
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_ST_STATUS_RESULT_TABLE;
+
+    -- 첫 번째 INSERT INTO 문
+    INSERT INTO T_ST_STATUS_RESULT_TABLE (ACCOUNT_PERIOD_NO, lev, code, acc_name, total)
+        SELECT DISTINCT
+        p_period_no,
+        lev,
+        code,
+        a1.account_name AS acc_name,
+        total 
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                    WHEN GREAT_Grandparent_account_code IS NOT NULL THEN GREAT_Grandparent_account_code
+                END AS code,
+                GREAT_Grandparent_account_code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+									    CASE
+									        WHEN ACCOUNT_code IS NOT NULL THEN 4
+									        WHEN Parent_account_code IS NOT NULL THEN 3
+									        WHEN Grandparent_account_code IS NOT NULL THEN 2
+									        WHEN GREAT_Grandparent_account_code IS NOT NULL THEN 1		
+									    END AS LEV,
+									    GREAT_Grandparent_account_code,
+									    Grandparent_account_code,
+									    Parent_account_code,
+									    ACCOUNT_code,
+									    SUM(DEBITS) AS DEBITS,
+									    SUM(CREDITS) AS CREDITS,
+									    SUM(DEBITS) - SUM(CREDITS) AS TOTAL
+									FROM (
+									    SELECT
+									        CASE
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A1.ACCOUNT_INNER_CODE
+									            ELSE (SELECT ACCOUNT_INNER_CODE FROM ACCOUNT WHERE ACCOUNT_INNER_CODE = A1.PARENT_ACCOUNT_INNER_CODE) 
+									        END AS GREAT_Grandparent_account_code,
+									        CASE
+									        	  WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN A2.ACCOUNT_INNER_CODE
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN NULL
+									            ELSE A1.ACCOUNT_INNER_CODE
+									        END AS Grandparent_account_code,
+									        CASE
+									        		WHEN A2.ACCOUNT_NAME LIKE '%유동%' THEN NULL
+									            WHEN A1.PARENT_ACCOUNT_INNER_CODE = '0101-1000' THEN A2.ACCOUNT_INNER_CODE
+									            ELSE A2.ACCOUNT_INNER_CODE
+									        END AS Parent_account_code,
+									        A3.ACCOUNT_INNER_CODE AS account_code,
+									        A3.account_character AS account_character,
+									        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+									        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+									    FROM
+									        ACCOUNT A1
+									        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+									        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+									        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+									        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+									    WHERE
+									        S.ACCOUNT_PERIOD_NO = p_period_no
+									        AND S.SLIP_STATUS = '승인'
+									        AND A1.ACCOUNT_NAME != '손익'
+									)
+									GROUP BY
+									    ROLLUP(GREAT_Grandparent_account_code, Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code
+      AND lev != 0;
+
+    -- 필수 표시과목 중 없는 과목 추가
+    INSERT INTO T_ST_STATUS_RESULT_TABLE (ACCOUNT_PERIOD_NO, lev, code, acc_name, total)
+    SELECT 
+    		p_period_no,
+        lev,
+        code,
+        acc_name,
+        total
+    FROM 
+        statment_status_account ssa
+    WHERE 
+        NOT EXISTS (
+            SELECT 1
+            FROM T_ST_STATUS_RESULT_TABLE trt
+            WHERE trt.acc_name = ssa.acc_name
+        )
+       OR lev =0;
+    
+    --미처분이익잉여금 구하는 함수
+		v_earnings := GET_RETAINED_EARNINGS(p_period_no);
+		
+		-- T_ST_STATUS_RESULT_TABLE에서 '미처분이익잉여금'의 total 값을 v_earnings로 업데이트
+    UPDATE T_ST_STATUS_RESULT_TABLE
+    SET total = v_earnings
+    WHERE code IN ('0351-0380', '0377');
+    
+    -- 자본 그룹의 total 값을 계산
+    SELECT SUM(total) INTO v_total_capital
+    FROM T_ST_STATUS_RESULT_TABLE
+    WHERE SUBSTR(code, 1, 4) BETWEEN '0331' AND '0401'
+      AND lev = 2;
+    
+    -- lev가 0이고 acc_name이 '자본'인 행의 total 값을 자본 그룹의 total 값으로 업데이트
+    UPDATE T_ST_STATUS_RESULT_TABLE
+    SET total = v_total_capital
+    WHERE lev = 1 AND code = '0331-0400';
+END;
+
+*****************************************P_STATEMENT_STATUS_COMBINED***********************************************
+CREATE OR REPLACE PROCEDURE ACC79.P_STATEMENT_STATUS_COMBINED (
+    p_period_no IN NUMBER,
+    p_prev_period_no IN NUMBER,
+    p_result OUT SYS_REFCURSOR
+) IS
+
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_STATEMENT_TEMP_CURRENT;
+    DELETE FROM T_STATEMENT_TEMP_PREVIOUS;
+    DELETE FROM T_STATEMENT_COMBINED_RESULT;
+
+    -- 현재 기간 데이터 삽입
+    ACC79.P_COMPUTE_STATEMENT_STATUS(p_period_no);
+    INSERT INTO T_STATEMENT_TEMP_CURRENT (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_ST_STATUS_RESULT_TABLE;
+    DELETE FROM T_ST_STATUS_RESULT_TABLE;
+
+    -- 이전 기간 데이터 삽입
+    ACC79.P_COMPUTE_STATEMENT_STATUS(p_prev_period_no);
+    INSERT INTO T_STATEMENT_TEMP_PREVIOUS (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_ST_STATUS_RESULT_TABLE;
+    DELETE FROM T_ST_STATUS_RESULT_TABLE;
+
+    -- 현재 기간과 이전 기간 데이터를 조인하여 최종 테이블에 삽입
+    INSERT INTO T_STATEMENT_COMBINED_RESULT (
+        ACCOUNT_PERIOD_NO,
+        lev,
+        code,
+        acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+    )
+		SELECT
+		    MAX(COALESCE(c.account_period_no, p.account_period_no)) AS account_period_no,
+		    COALESCE(c.lev, p.lev) AS lev,
+		    COALESCE(c.code, p.code) AS code,
+		    COALESCE(c.acc_name, p.acc_name) AS acc_name,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) = 4 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS lev3CurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) != 4 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS OtherLevCurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) = 4 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS lev3PreTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) != 4 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS OtherLevPreTotal
+		FROM
+		    T_STATEMENT_TEMP_CURRENT c
+		    FULL OUTER JOIN T_STATEMENT_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+		GROUP BY
+		    COALESCE(c.lev, p.lev),
+		    COALESCE(c.code, p.code),
+		    COALESCE(c.acc_name, p.acc_name);
+		    
+		INSERT INTO T_STATEMENT_COMBINED_RESULT (
+        ACCOUNT_PERIOD_NO,
+        lev,
+        code,
+        acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+    )
+		SELECT 
+			  null, 0 as lev, account_inner_code, account_name, 0, 0, 0, 0
+		  FROM ACCOUNT
+		 WHERE PARENT_ACCOUNT_INNER_CODE = '0101-1000'
+		   AND account_name != '손익';
+		
+		DECLARE
+		    v_total_current VARCHAR2(50);
+		    v_total_previous VARCHAR2(50);
+    
+		BEGIN
+		    FOR i IN 1..3 LOOP
+		        IF i = 1 THEN
+		            INSERT INTO T_STATEMENT_COMBINED_RESULT (account_period_no, lev, code, acc_name, lev3CurrentTotal, OtherLevCurrentTotal, lev3PreTotal, OtherLevPreTotal)
+		            VALUES (p_period_no, 4, '0400-0001', '(당기 순이익)', 0, 0, 0, 0);
+		        ELSIF i = 2 THEN
+		            ACC79.P_COMPUTE_INCOME_STATEMENT2(p_period_no);
+                SELECT CAST(TOTAL AS VARCHAR2(50)) INTO v_total_current
+                FROM T_FINAL_RESULT
+                WHERE code IS null;
+		            
+		            INSERT INTO T_STATEMENT_COMBINED_RESULT (account_period_no, lev, code, acc_name, lev3CurrentTotal, OtherLevCurrentTotal, lev3PreTotal, OtherLevPreTotal)
+		            VALUES (p_period_no, 4, '0400-0002', '당기 : ' || v_total_current, 0, 0, 0, 0);
+		        ELSIF i = 3 THEN
+		            ACC79.P_COMPUTE_INCOME_STATEMENT2(p_prev_period_no);
+                SELECT CAST(TOTAL AS VARCHAR2(50)) INTO v_total_previous
+                FROM T_FINAL_RESULT
+                WHERE code IS null;
+		            
+		            INSERT INTO T_STATEMENT_COMBINED_RESULT (account_period_no, lev, code, acc_name, lev3CurrentTotal, OtherLevCurrentTotal, lev3PreTotal, OtherLevPreTotal)
+		            VALUES (p_period_no, 4, '0400-0003', '전기 : ' || v_total_previous, 0, 0, 0, 0);
+		        END IF;
+		    END LOOP;
+		END;
+    -- 최종 결과 반환
+    OPEN p_result FOR
+		SELECT
+		    account_period_no,
+		    lev,
+		    code,
+		    acc_name,
+		    ABS(lev3CurrentTotal) AS lev3CurrentTotal,
+		    ABS(OtherLevCurrentTotal) AS OtherLevCurrentTotal,
+		    ABS(lev3PreTotal) AS lev3PreTotal,
+		    ABS(OtherLevPreTotal) AS OtherLevPreTotal
+		FROM T_STATEMENT_COMBINED_RESULT
+		ORDER BY
+		    -- Grouping by '자산', '부채', '자본' based on code ranges
+		    CASE
+		        WHEN SUBSTR(code, 1, 4) BETWEEN '0101' AND '0250' THEN 1  -- 자산
+		        WHEN SUBSTR(code, 1, 4) BETWEEN '0251' AND '0330' THEN 2  -- 부채
+		        WHEN SUBSTR(code, 1, 4) BETWEEN '0331' AND '0401' THEN 3  -- 자본
+		        ELSE 4  -- 기타
+		    END,
+		    -- Within each group, lev 0 goes to the top and lev 1 goes to the bottom
+		    CASE
+		        WHEN lev = 0 THEN 0
+		        WHEN lev = 1 THEN 2
+		        ELSE 1
+		    END,
+		    -- Order within '자본' group
+		    CASE
+		        WHEN SUBSTR(code, 1, 4) = '0331' THEN 1 -- 자본금
+		        WHEN SUBSTR(code, 1, 4) = '0341' THEN 2 -- 자본잉여금
+		        WHEN SUBSTR(code, 1, 4) = '0381' THEN 3 -- 자본조정
+		        WHEN SUBSTR(code, 1, 4) = '0392' THEN 4 -- 기타포괄손익
+		        WHEN SUBSTR(code, 1, 4) = '0351' THEN 5 -- 이익잉여금
+		        WHEN SUBSTR(code, 1, 4) = '0377' THEN 6 -- 미처분이익잉여금
+		    END,
+		    -- Additional ordering criteria within groups
+		    SUBSTR(code, 1, 4),
+		    CASE
+		        WHEN lev = 2 THEN SUBSTR(code, 6)
+		        ELSE NULL
+		    END DESC NULLS LAST,
+		    CASE
+		        WHEN lev != 2 THEN lev
+		        ELSE NULL
+		    END,
+		    CASE 
+	        WHEN code = '0400-0001' THEN 1  -- 당기 순이익
+	        WHEN code = '0400-0002' THEN 2  -- 당기
+	        WHEN code = '0400-0003' THEN 3  -- 전기
+	        ELSE 4  -- 기타
+    		END;
+END;
+
+
+*****************************************GET_RETAINED_EARNINGS***********************************************
+CREATE OR REPLACE FUNCTION ACC79.GET_RETAINED_EARNINGS(p_period_no NUMBER) RETURN NUMBER IS
+    v_retained_earnings NUMBER;
+BEGIN
+		--초기화
+		delete FROM T_RETAINED_EARNING_TABLE; 
+    -- 현재 기간 데이터 삽입
+    ACC79.P_COMPUTE_INCOME_STATEMENT2(p_period_no);
+    INSERT INTO T_RETAINED_EARNING_TABLE (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_FINAL_RESULT;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 잉여금 계산
+    SELECT SUM(total_balance) INTO v_retained_earnings FROM (
+        SELECT SUM(balance) AS total_balance
+        FROM (
+            SELECT
+                NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance
+            FROM (
+                SELECT * FROM ACCOUNT
+                WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+                AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+            ) A
+            LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+            LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+            GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+            UNION ALL
+
+            SELECT
+                total AS balance
+            FROM (
+                SELECT * FROM T_RETAINED_EARNING_TABLE WHERE code IS NULL
+            )
+        )
+    );
+
+    RETURN v_retained_earnings;
+END;
+
+*****************************************P_RE_DISPOSAL***********************************************
+--이익잉여금 처분계산서 아이큐브 형태. 만들다 완성 못하고 남기게 되었어용 프로젝트엔 반영안되있는 코드니까 관심있으시면 뜯어서 반영해주십셔!
+CREATE OR REPLACE PROCEDURE ACC79.P_RE_DISPOSAL (
+    p_period_no IN NUMBER
+) IS
+    v_total_balance NUMBER;
+BEGIN
+    -- 미처분이익잉여금 계산
+    v_total_balance := GET_RETAINED_EARNINGS(p_period_no);
+
+    -- 결과를 저장할 테이블 초기화
+    DELETE FROM T_RE_DISPOSAL;
+
+    -- 데이터를 T_RE_DISPOSAL 테이블에 삽입
+    INSERT INTO T_RE_DISPOSAL (index_code, account_name, name_account, balance1, balance2)
+    SELECT 
+        index_code,
+        account_name,
+        name_account,
+        ABS(SUM(CASE
+             WHEN c.account_name IS NOT NULL AND c.name_account IS NOT NULL THEN NVL(c.balance, 0)
+             ELSE 0
+         END)) AS balance1,
+        ABS(SUM(CASE
+                     WHEN c.name_account IS NULL AND c.account_name LIKE '%미처분%' THEN v_total_balance
+                     ELSE 0
+                 END)) AS balance2
+    FROM (
+        SELECT 
+            A1.index_code AS index_code,
+            A1.ACCOUNT_NAME AS account_name,
+            A2.name_account AS name_account,
+            NVL(A2.BALANCE, 0) AS balance
+        FROM (
+            SELECT * FROM T_RETAINED_EARNINGS
+        ) A1
+        INNER JOIN (
+            SELECT 
+                result.*,
+                ROW_NUMBER() OVER(ORDER BY lev DESC, parent DESC) AS index_code
+            FROM (
+                -- 기존 쿼리
+                SELECT 
+                    2 AS lev,
+                    A.PARENT_ACCOUNT_INNER_CODE AS parent,
+                    CAST(A.account_name AS VARCHAR2(50)) AS name_account,
+                    NVL(SUM(J.RIGHT_CREDITS_PRICE) - SUM(J.LEFT_DEBTOR_PRICE), 0) AS balance    
+                FROM (
+                    SELECT * FROM ACCOUNT
+                    WHERE (PARENT_ACCOUNT_INNER_CODE LIKE '%0380' OR PARENT_ACCOUNT_INNER_CODE LIKE '%0290')
+                    AND ACCOUNT_CODE IN ('0375', '0369', '0370', '0371', '0265')
+                ) A
+                LEFT JOIN JOURNAL J ON A.ACCOUNT_INNER_CODE = J.ACCOUNT_INNER_CODE
+                LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                GROUP BY A.PARENT_ACCOUNT_INNER_CODE, A.account_name
+
+                UNION ALL
+
+                -- 현재 순이익 행을 추가하는 쿼리
+                SELECT 
+                    B.lev,
+                    B.code AS parent,
+                    B.acc_name AS name_account,
+                    B.total AS balance
+                FROM (
+                    SELECT * FROM T_RETAINED_EARNING_TABLE WHERE code IS NULL
+                ) B
+            ) result
+            ORDER BY 
+                lev DESC,
+                parent DESC
+        ) A2 ON A1.index_code = A2.index_code(+) 
+    ) C
+    GROUP BY
+        index_code,
+        account_name,
+        name_account
+    ORDER BY 
+        CASE 
+            WHEN account_name = 'I.미처분이익잉여금' THEN 0 
+            ELSE 1 
+        END, 
+        index_code;
+END;
+/
+
+
+
+*****************************************예외 처리 예시***********************************************
+
+넘버형 리턴
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('NO_DATA_FOUND');
+        RETURN -1; -- 예외 발생 시 반환할 값 설정
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('OTHERS: 관리자에게 문의하세요 // 010-1231-1234');
+        RETURN -1; -- 예외 발생 시 반환할 값 설정
+END ACC79.GET_RETAINED_EARNINGS;
+
+
+커서형 리턴
+EXCEPTION
+
+WHEN NO_DATA_FOUND THEN
+       DBMS_OUTPUT.PUT_LINE('NO_DATA_FOUND');
+       ERROR_CODE := '-1';
+       ERROR_MSG := 'NO_DATA_FOUND';
+       RETURN;
+
+WHEN OTHERS THEN
+       DBMS_OUTPUT.PUT_LINE('OTHERS');
+       ERROR_CODE := '-1' ;
+       ERROR_MSG := '관리자에게 문의하세여 //010-1231-1234';
+       RETURN;
+
+END;

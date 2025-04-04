@@ -1,0 +1,36 @@
+앞단
+
+- 실행
+node.js 버전은 18.16.0 설치
+
+vscode command prompt창에 
+1. pnpm install 
+2. pnpm run dev (실행)
+
+// node_modules이 없다면 - npm i
+(복사, 압축, 삭제시 시간 오래걸리니 주의)
+
+
+- 코드
+dashboard에서 보이는 모든 페이지는 
+navigation/vertical/index.ts에서 router 느낌으로 제어
+(pages에 존재해야 link가능)
+
+실제 페이지 template은 
+components에서 파트별로 구현하고 
+pages에서 import하여 호출
+
+api - 백단에 데이터 crud 작업 요청하는 코드구현
+
+store - api를 통해 불러온 서버측 데이터를 보관하는 역할, 필요한 vue에서
+import { accountStore } from "@/store/account/account"; 꼴로 import 하여 사용
+실질적으로 modal(dialog)창에서 가장 많이 사용
+
+// vue의 store 역할을 하던 vuex가 공식 라이브러리인 pinia로 대체됨
+
+modal창은 재사용의 경우를 대비해
+ 필요 페이지에서 바로 만들지말고, 따로 modal폴더에 ~modal.vue를 만들어서 import해서 사용
+
+// 간혹 소스트리 커밋푸시후 module_error가 나면 node_modules/.pnpm/@defu_5.0.1 과 @defu_6.1.2가 같이 존재하는지 확인
+=> 5.0.1 삭제
+

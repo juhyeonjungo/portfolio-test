@@ -1,0 +1,418 @@
+-----------------------------------------합계 잔액 시산표 변경점
+INSERT INTO account (
+    account_inner_code,
+    parent_account_inner_code,
+    account_code,
+    account_character,
+    account_name,
+    account_display_name_with_code,
+    account_display_name,
+    account_division,
+    account_use_check,
+    account_description,
+    group_code,
+    editable,
+    budget,
+    fixed_assets
+) VALUES (
+    '0931',
+    '0931-0997',
+    '0931',
+    '지출이자',
+    '이자비용',
+    null,
+    null,
+    '차변',
+    null,
+    null,
+    '9.영업 외 비용',
+    0,
+    'F',
+    null
+);
+
+--4기수 문제 전표 수정
+UPDATE JOURNAL
+SET RIGHT_CREDITS_PRICE = 12000
+WHERE SLIP_NO = '20231231SLIP00006'
+  AND BALANCE_DIVISION = '대변'
+  AND RIGHT_CREDITS_PRICE = 10020;
+
+--account 코드번호 수정 - 내림차순 정리 잘되게
+UPDATE account
+SET account_inner_code = '0931-0997'
+WHERE ACCOUNT_inner_code = '0951-0997';
+
+COMMIT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------손익계산서 프로시져 테이블 제작
+
+CREATE TABLE T_RESULT_TABLE (
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_FINAL_RESULT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_TEMP_CURRENT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_TEMP_PREVIOUS (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    total NUMBER
+);
+
+CREATE TABLE T_COMBINED_FINAL_RESULT (
+    ACCOUNT_PERIOD_NO NUMBER,
+    lev NUMBER,
+    code VARCHAR2(20),
+    acc_name VARCHAR2(50),
+    lev3CurrentTotal NUMBER,
+    OtherLevCurrentTotal NUMBER,
+    lev3PreTotal NUMBER,
+    OtherLevPreTotal NUMBER
+);
+
+
+
+
+
+
+----------------손익계산서 함수 및 프로시져 제작
+CREATE OR REPLACE FUNCTION ACC79.GET_ACCOUNT_DATA (
+		p_period_no IN NUMBER,
+    p_lev IN NUMBER,
+    p_code IN VARCHAR2,
+    p_acc_name IN VARCHAR2,
+    p_conditions IN VARCHAR2
+) RETURN SYS_REFCURSOR IS
+    v_result SYS_REFCURSOR;
+BEGIN
+    OPEN v_result FOR
+    SELECT
+        p_lev AS lev,
+        p_code AS code,
+        p_acc_name AS acc_name,
+        (SELECT ABS(SUM(NVL(CREDITS, 0)) - SUM(NVL(DEBITS, 0)))
+         FROM (
+             SELECT
+                 NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                 NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+             FROM
+                 ACCOUNT A1
+                 LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                 LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                 LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                 LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+             WHERE
+                 S.ACCOUNT_PERIOD_NO = p_period_no
+                 AND S.SLIP_STATUS = '승인'
+                 AND A1.ACCOUNT_NAME = '손익'
+                 AND INSTR(p_conditions, A2.ACCOUNT_NAME) > 0
+         )) AS total
+    FROM DUAL;
+    RETURN v_result;
+END;
+
+
+
+
+
+--2024-06-04 제작
+CREATE OR REPLACE PROCEDURE ACC79.P_COMPUTE_INCOME_STATEMENT2 (
+    p_period_no IN NUMBER
+) AS
+    v_cursor1 SYS_REFCURSOR;
+    v_cursor2 SYS_REFCURSOR;
+    v_cursor3 SYS_REFCURSOR;
+    v_lev NUMBER;
+    v_code VARCHAR2(20);
+    v_acc_name VARCHAR2(50);
+    v_total NUMBER;
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_RESULT_TABLE;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 쿼리 결과를 임시 테이블에 삽입
+    INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total)
+    SELECT
+        lev,
+        code,
+        CAST(NVL(a1.account_name, '당기순이익') AS VARCHAR2(20)) AS acc_name,
+        ABS(total)
+    FROM
+        account a1,
+        (
+            SELECT
+                NVL(lev, 0) AS lev,
+                CASE
+                    WHEN ACCOUNT_code IS NOT NULL THEN ACCOUNT_code
+                    WHEN Parent_account_code IS NOT NULL THEN Parent_account_code
+                    WHEN Grandparent_account_code IS NOT NULL THEN Grandparent_account_code
+                END AS code,
+                Grandparent_account_code,
+                Parent_account_code,
+                ACCOUNT_code,
+                TOTAL
+            FROM (
+                SELECT
+                    CASE
+                        WHEN ACCOUNT_code IS NOT NULL THEN 3
+                        WHEN Parent_account_code IS NOT NULL THEN 2
+                        WHEN Grandparent_account_code IS NOT NULL THEN 1
+                    END AS LEV,
+                    Grandparent_account_code,
+                    Parent_account_code,
+                    ACCOUNT_code,
+                    SUM(DEBITS),
+                    SUM(CREDITS),
+                    SUM(CREDITS) - SUM(DEBITS) AS TOTAL
+                FROM (
+                    SELECT
+                        A1.ACCOUNT_INNER_CODE AS Grandparent_account_code,
+                        A2.ACCOUNT_INNER_CODE AS Parent_account_code,
+                        A3.ACCOUNT_INNER_CODE AS account_code,
+                        A3.group_code AS group_name,
+                        NVL(J.LEFT_DEBTOR_PRICE, 0) AS DEBITS,
+                        NVL(J.RIGHT_CREDITS_PRICE, 0) AS CREDITS
+                    FROM
+                        ACCOUNT A1
+                        LEFT JOIN ACCOUNT A2 ON A2.PARENT_ACCOUNT_INNER_CODE = A1.ACCOUNT_INNER_CODE
+                        LEFT JOIN ACCOUNT A3 ON A3.PARENT_ACCOUNT_INNER_CODE = A2.ACCOUNT_INNER_CODE
+                        LEFT JOIN JOURNAL J ON J.ACCOUNT_INNER_CODE = A3.ACCOUNT_INNER_CODE
+                        LEFT JOIN SLIP S ON S.SLIP_NO = J.SLIP_NO
+                    WHERE
+                        S.ACCOUNT_PERIOD_NO = p_period_no
+                        AND S.SLIP_STATUS = '승인'
+                        AND A1.ACCOUNT_NAME = '손익'
+                )
+                GROUP BY
+                    ROLLUP(Grandparent_account_code, Parent_account_code, ACCOUNT_code)
+            )
+        ) cal1
+    WHERE a1.account_inner_code(+) = cal1.code
+      AND lev != 1;
+
+		DECLARE
+		    v_code VARCHAR2(10);
+		    v_acc_name VARCHAR2(50);
+		BEGIN
+		    -- 추가 행 삽입
+		    FOR i IN 1..6 LOOP
+		        -- 조건에 따른 코드와 계정명 설정
+		        CASE i
+		            WHEN 1 THEN
+		                v_code := '0401-0430';
+		                v_acc_name := '매출';
+		            WHEN 2 THEN
+		                v_code := '0501-0600';
+		                v_acc_name := '제조원가';
+		            WHEN 3 THEN
+		                v_code := '0801-0900';
+		                v_acc_name := '판매비및일반관리비';
+		            WHEN 4 THEN
+		                v_code := '0901-0950';
+		                v_acc_name := '영업외수익';
+		            WHEN 5 THEN
+		                v_code := '0931-0997';
+		                v_acc_name := '영업외비용';
+		            WHEN 6 THEN
+		                v_code := '0998-0999';
+		                v_acc_name := '법인(소득)세등';
+		        END CASE;
+
+		        -- BEGIN...END 블록으로 감싸기
+		        BEGIN
+		            -- 임시 테이블에 추가 행 삽입
+		            INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total)
+		            SELECT
+		                2 AS lev,
+		                v_code AS code,
+		                v_acc_name AS acc_name,
+		                0 AS total
+		            FROM
+		                dual
+		            WHERE
+		                NOT EXISTS (
+		                    SELECT 1
+		                    FROM
+		                        T_RESULT_TABLE
+		                    WHERE
+		                        acc_name = v_acc_name
+		                );
+		        END;
+		    END LOOP;
+		END;
+
+    -- 커서 실행 및 임시 테이블에 데이터 삽입
+    v_cursor1 := GET_ACCOUNT_DATA(p_period_no, 4, '0799-0999', '매출 총이익', '매출,제조원가');
+    v_cursor2 := GET_ACCOUNT_DATA(p_period_no, 4, '0900-0998', '영업이익', '매출,제조원가,판매비및일반관리비');
+    v_cursor3 := GET_ACCOUNT_DATA(p_period_no, 4, '0997-0998', '법인세비용 차감전 순이익', '매출,제조원가,판매비및일반관리비,영업외수익,영업외비용');
+
+    -- 커서 결과를 임시 테이블에 삽입
+    LOOP
+        FETCH v_cursor1 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor1%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, v_total);
+    END LOOP;
+    CLOSE v_cursor1;
+
+    LOOP
+        FETCH v_cursor2 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor2%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, v_total);
+    END LOOP;
+    CLOSE v_cursor2;
+
+    LOOP
+        FETCH v_cursor3 INTO v_lev, v_code, v_acc_name, v_total;
+        EXIT WHEN v_cursor3%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('v_lev: ' || v_lev || ', v_code: ' || v_code || ', v_acc_name: ' || v_acc_name || ', v_total: ' || v_total);
+        INSERT INTO T_RESULT_TABLE (lev, code, acc_name, total) VALUES (v_lev, v_code, v_acc_name, NVL(v_total, 0));
+    END LOOP;
+    CLOSE v_cursor3;
+
+		INSERT INTO T_FINAL_RESULT (account_period_no, lev, code, acc_name, total)
+    SELECT p_period_no, lev, code, acc_name, total
+    FROM T_RESULT_TABLE;
+
+END;
+
+
+
+
+
+
+--2024-06-04 제작
+CREATE OR REPLACE PROCEDURE ACC79.P_INCOME_STATEMENT_COMBINED (
+    p_period_no IN NUMBER,
+    p_prev_period_no IN NUMBER,
+    p_result OUT SYS_REFCURSOR
+) AS
+    v_cursor SYS_REFCURSOR;
+BEGIN
+    -- 임시 테이블 초기화
+    DELETE FROM T_TEMP_CURRENT;
+    DELETE FROM T_TEMP_PREVIOUS;
+    DELETE FROM T_COMBINED_FINAL_RESULT;
+
+    -- 현재 기간 데이터 삽입
+    ACC79.P_COMPUTE_INCOME_STATEMENT2(p_period_no);
+    INSERT INTO T_TEMP_CURRENT (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_FINAL_RESULT;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 이전 기간 데이터 삽입
+    ACC79.P_COMPUTE_INCOME_STATEMENT2(p_prev_period_no);
+    INSERT INTO T_TEMP_PREVIOUS (account_period_no, lev, code, acc_name, total)
+    SELECT account_period_no, lev, code, acc_name, total FROM T_FINAL_RESULT;
+    DELETE FROM T_FINAL_RESULT;
+
+    -- 현재 기간과 이전 기간 데이터를 조인하여 최종 테이블에 삽입
+    INSERT INTO T_COMBINED_FINAL_RESULT (
+        ACCOUNT_PERIOD_NO,
+        lev,
+        code,
+        acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+    )
+		SELECT
+		    MAX(COALESCE(c.account_period_no, p.account_period_no)) AS account_period_no,
+		    COALESCE(c.lev, p.lev) AS lev,
+		    COALESCE(c.code, p.code) AS code,
+		    COALESCE(c.acc_name, p.acc_name) AS acc_name,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) = 3 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS lev3CurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(c.lev, p.lev) != 3 THEN NVL(c.total, 0)
+		            ELSE 0
+		        END) AS OtherLevCurrentTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) = 3 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS lev3PreTotal,
+		    SUM(CASE
+		            WHEN COALESCE(p.lev, c.lev) != 3 THEN NVL(p.total, 0)
+		            ELSE 0
+		        END) AS OtherLevPreTotal
+		FROM
+		    T_TEMP_CURRENT c
+		    FULL OUTER JOIN T_TEMP_PREVIOUS p ON c.code = p.code AND c.acc_name = p.acc_name
+		GROUP BY
+		    COALESCE(c.lev, p.lev),
+		    COALESCE(c.code, p.code),
+		    COALESCE(c.acc_name, p.acc_name);
+
+    -- 최종 결과 반환
+    OPEN p_result FOR
+    SELECT 
+    		account_period_no,
+    		lev,
+    		code,
+     		CASE 
+		     WHEN acc_name = '매출' THEN '(1) 매출'
+		      WHEN acc_name = '제조원가' THEN '(2) 제조원가'
+		      WHEN acc_name = '매출 총이익' THEN '1. 매출 총이익'
+		      WHEN acc_name = '판매비및일반관리비' THEN '(1) 판매비및일반관리비'
+		      WHEN acc_name = '영업이익' THEN '2. 영업이익'
+		      WHEN acc_name = '영업외수익' THEN '(1) 영업외수익'
+		      WHEN acc_name = '영업외비용' THEN '(2) 영업외비용'
+		      WHEN acc_name = '법인세비용 차감전 순이익' THEN '3. 법인세비용 차감전 순이익'
+		      WHEN acc_name = '법인(소득)세등' THEN '(1) 법인(소득)세등'
+		      WHEN acc_name = '운송원가' THEN '(2-1) 운송원가'
+		      ELSE acc_name
+        END AS acc_name,
+        lev3CurrentTotal,
+        OtherLevCurrentTotal,
+        lev3PreTotal,
+        OtherLevPreTotal
+       FROM T_COMBINED_FINAL_RESULT
+    ORDER BY
+        SUBSTR(code, 1, 4),
+        CASE
+            WHEN lev = 2 THEN SUBSTR(code, 6) END DESC NULLS LAST,
+        CASE
+            WHEN lev != 2 THEN lev END;
+END;
+
+
+

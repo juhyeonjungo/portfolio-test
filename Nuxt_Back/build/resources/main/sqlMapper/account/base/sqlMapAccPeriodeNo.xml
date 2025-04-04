@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed Feb 26 09:48:29 KST 2020-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.seoulit.erp.account.base.dao.AccPeriodNoDAO">
+
+    <!--   =============================  2025-03-21 기수관리   mapper 생성 ==============================   -->
+
+    <resultMap id="periodNoResult" type="kr.co.seoulit.erp.account.base.to.PeriodNoBean">
+
+        <result property="accountPeriodNo" column="ACCOUNT_PERIOD_NO"/>
+        <result property="periodStartDate" column="PERIOD_START_DATE"/>
+        <result property="periodEndDate" column="PERIOD_END_DATE"/>
+        <result property="workplaceCode" column="WORKPLACE_CODE"/>
+    </resultMap>
+
+    <select id="selectPeriodNoList" resultMap="periodNoResult">
+        SELECT TO_CHAR(ACCOUNT_PERIOD_NO,'FM999,999,999,999') AS ACCOUNT_PERIOD_NO,
+               PERIOD_START_DATE,
+               PERIOD_END_DATE,
+               WORKPLACE_CODE
+               FROM PERIOD ORDER BY ACCOUNT_PERIOD_NO  DESC
+    </select>
+
+    <insert id="addPeriodNoList" parameterType="kr.co.seoulit.erp.account.base.to.PeriodNoBean">
+    <![CDATA[
+        insert into
+            period
+        values((select count(*)+1 from period),#{periodStartDate},#{periodEndDate},'BRC-01')
+        ]]>
+	</insert>
+
+    <update id="updatePeriodNoList" parameterType="kr.co.seoulit.erp.account.base.to.PeriodNoBean">
+    <![CDATA[
+        UPDATE PERIOD SET
+                          WORKPLACE_CODE=#{workplaceCode},
+                          PERIOD_START_DATE=#{periodStartDate},
+                          PERIOD_END_DATE=#{periodEndDate}
+        WHERE ACCOUNT_PERIOD_NO=#{accountPeriodNo}
+
+
+        ]]>
+    </update>
+
+
+
+    <delete id="deletePeriodNo" parameterType="int">
+        DELETE FROM PERIOD
+        WHERE ACCOUNT_PERIOD_NO = #{bean}
+    </delete>
+
+
+
+
+
+</mapper>
